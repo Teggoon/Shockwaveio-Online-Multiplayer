@@ -7,7 +7,7 @@ socc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 port = 5000
 
-socc.connect(('128.54.240.232', port))
+socc.connect(('127.0.0.1', port))
 
 print("Content-type: text/html\n\n");
 
