@@ -3,41 +3,176 @@
     <head>
         <meta charset="utf-8" />
         <title>Shockwave.io</title>
+
+        <style>
+        #myCanvas {
+          position: absolute;
+          left: 100px;
+          border:1px solid #505050;
+        }
+        #textBlock {
+          position: absolute;
+          left:900px
+        }
+        </style>
     </head>
 
+
     <body>
+
         <h1>Shockwave.io connection test 2: group chat</h1>
+
+
+        <canvas id="myCanvas" width="750" height="450">
+          Your browser does not support the HTML5 canvas tag.
+        </canvas>
+
 
         <script src="/socket.io/socket.io.js"></script>
 
         <script>
-        var socket = io.connect('localhost:40378');
+
+        var characterDatas = [];
+        var myIndex = -1;
+        function CharacterData(id, name, x, y, score) {
+          this.id = id;
+          this.x = x;
+          this.y = y;
+          this.name = name;
+          this.score = score;
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+        /**
+        * Socket.io connection handler portion BEGINS
+        */
+
+        var updated = false;
+
+        var socket = io.connect('shockwave-io.com:40378');
         socket.on('message', function(message) {
             document.getElementById("messages").innerHTML += message +"<br/>";
         });
 
-        var givenName = false;
 
+        socket.on('init synchronization',function(length) {
+          for (var i = 0; i < length; i++) {
+            characterDatas.push(new CharacterData());
+          }
+          myIndex = length - 1;
+        });
+
+        socket.on('update character', function(i, id, name, x, y, score) {
+          if (characterDatas.length - 1 >= i){
+            characterDatas[i].id = id;
+            characterDatas[i].name = name;
+            characterDatas[i].x = x;
+            characterDatas[i].y = y;
+            characterDatas[i].score = score;
+          }
+        });
+
+        socket.on('new user', function(id, name, x, y, score) {
+          if (id != characterDatas[myIndex].id){
+            characterDatas.push(new CharacterData(id, name, x, y, score));
+          }
+        });
+
+        socket.on("confirm updated", function(str) {
+          alert("updated!");
+          updated = true;
+        });
+
+        socket.on("delete user", function(i) {
+          characterDatas.splice(i, 1);
+          if (i < myIndex) {
+              myIndex--;
+          }
+        });
+
+        var givenName = false;
         function sendStuff() {
 
-                var x = document.forms["chat"].elements[0].value;
+            var x = document.forms["chat"].elements[0].value;
             if (givenName) {
-        	    socket.emit("message", x);
+        	      socket.emit("message", x);
             } else {
                 socket.emit("name", x);
                 document.getElementById("button").innerHTML = "Send message";
                 givenName = true;
             }
 
+
         }
 
+
+        /**Socket.io connection handler portion ENDS*/
+
+
+        var c = document.getElementById("myCanvas");
+        //should be updated == TRUE, temporarily this
+        function drawCanvas () {
+              var ctx = c.getContext("2d");
+              ctx.beginPath();
+              ctx.rect(0, 0, 750, 450);
+              ctx.fillStyle = "white";
+              ctx.fill();
+
+              ctx.font = "30px Arial";
+              //ctx.fillText("Hello I'm a test canvas", 10, 50);
+              for (var i = 0; i < characterDatas.length; i++){
+                ctx.beginPath();
+                ctx.arc(characterDatas[i].x, characterDatas[i].y, 80, 0, 2 * Math.PI);
+                ctx.stroke();
+                ctx.font = "30px Arial";
+
+                ctx.strokeText(characterDatas[i].name + ": " + characterDatas[i].score, characterDatas[i].x, characterDatas[i].y);
+              }
+        }
+
+        function incrementScore(){
+            characterDatas[myIndex].score += 3;
+            socket.emit("update score", myIndex, characterDatas[myIndex].score);
+        }
+
+        document.getElementById("myCanvas").addEventListener("click", incrementScore, false);
+
+
+
+
+        setInterval(drawCanvas, 100);
+
+        function getStats() {
+          alert("Character data length: " + characterDatas.length + "\n");
+          for (var i = 0; i < characterDatas.length; i++){
+            alert(i + "th character: " + characterDatas[i].x + ", " + characterDatas[i].y + "," + characterDatas[i].score);
+          }
+        }
         </script>
 
+
+
+        <div id="textBlock">
         <form id='chat'>
         <input type="text" name="inputText" value="" autocomplete="off"><br>
         </form>
         <button id="button" onClick=sendStuff()>Please input your name</button>
         <div id="messages"></div>
-        <canvas id="myCanvas" width="700" height="500"></canvas>
+        <button id="stats" onClick=getStats()>Get stats</button>
+      </div>
+
+
+
     </body>
 </html>
