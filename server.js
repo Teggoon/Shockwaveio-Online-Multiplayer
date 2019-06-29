@@ -41,22 +41,18 @@ io.on('connection', function(socket){
     console.log('user disconnected');
   });
 
+    socket.on('message', function(msg) {
+        console.log(msg);
+      io.emit("message", socketUserMap.get(socket).name + ": " + msg);
+    });
+
+    socket.on('name', function(name) {
+        console.log("new user's name is" + name);
+        socketUserMap.set(socket, new User(name, socket));
+        io.emit("message", "New user's name is: " + name + ". Welcome!");
+    });
 });
 
-io.on('connection', function(socket){
-  socket.on('message', function(msg) {
-      console.log(msg);
-    io.emit("message", socketUserMap.get(socket).name + ": " + msg);
-  });
-});
-
-io.on('connection', function(socket){
-  socket.on('name', function(name) {
-      console.log("new user's name is" + name);
-      socketUserMap.set(socket, new User(name, socket));
-      io.emit("message", "New user's name is: " + name + ". Welcome!");
-  });
-});
 
 
 server.listen(40378);
