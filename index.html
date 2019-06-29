@@ -9,28 +9,7 @@
         <h1>Shockwave.io connection test 2: group chat</h1>
 
         <script src="/socket.io/socket.io.js"></script>
-        <script>
-            var socket = io.connect('http://shockwave-io.com:40378');
-	    	socket.on('message', function(message) {
-        	    document.getElementById("messages").innerHTML += message +"<br/>";
-	    	});
-        	
-        	var givenName = false;
-        	
-        	function sendStuff() {
-        	    
-                    var x = document.forms["chat"].elements[0].value;
-        	    if (givenName) {
-            	    socket.emit("message", x);
-        	    } else {
-        	        socket.emit("name", x);
-        	        document.getElementById("button").innerHTML = "Send message";
-        	        givenName = true;
-        	    }
-        	    
-        	};
-	    
-        </script>
+        <script src="client.js"></script>
         
         <form id='chat'>
         <input type="text" name="inputText" value="" autocomplete="off"><br>
