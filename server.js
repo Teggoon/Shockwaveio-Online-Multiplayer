@@ -20,7 +20,7 @@ var server = http.createServer(function(req, res) {
 
 var socketUserMap = new Map();
 
-var characters = [];
+var characters = new Map();
 var idCounter = 1;
 
 function User (id, name, sock) {
@@ -40,6 +40,9 @@ function Character (id, name, user, x, y) {
     this.y = y;
     this.score = 0;
     this.name = name;
+    this.vx = 0;
+    this.vy = 0;
+    this.velocity = 10;
 }
 
 // Loading socket.io
@@ -64,17 +67,11 @@ io.on('connection', function(socket){
       var userId = disappearedUser.id;
       console.log("disappeared user id:" + userId);
       var userIndex = -1;
-      for (var i = 0; i < characters.length; i++){
-        if (characters[i].id == userId) {
-          userIndex = i;
-          characters.splice(i, 1);
-          console.log("deleted a character!");
-        }
-      }
 
+      characters.delete(userId);
     }
 
-    io.emit("delete user", userIndex);
+    io.emit("delete user", userId);
       console.log('user disconnected');
     });
 
@@ -83,10 +80,14 @@ io.on('connection', function(socket){
       io.emit("message", socketUserMap.get(socket).name + ": " + msg);
     });
 
-    socket.on("update score", function(index, score) {
-      console.log(index);
-      console.log(characters.length);
-        characters[index].score = score;
+    socket.on("update score", function(id, score) {
+      console.log(id);
+      console.log(characters.size);
+        characters.get(id).score = score;
+    });
+
+    socket.on("user move up", function(index){
+
     });
 
     socket.on('name', function(name) {
@@ -94,24 +95,31 @@ io.on('connection', function(socket){
         idCounter++;
         var newUser = new User(idCounter, name, socket);
         socketUserMap.set(socket, newUser);
-        characters.push(newUser.character);
+        characters.set(idCounter, newUser.character);
 
 
-        socket.emit("init synchronization", characters.length);
+        socket.emit("init synchronization", idCounter);
 
-        for (var i = 0; i < characters.length; i++) {
-          var currentCharacter = characters[i];
-          socket.emit("update character", i, currentCharacter.id, currentCharacter.name, currentCharacter.x, currentCharacter.y, currentCharacter.score);
+        for (let [k, v] of characters) {
+          var currentCharacter = v;
+          socket.emit("update character", k, currentCharacter.name, currentCharacter.x, currentCharacter.y, currentCharacter.velocity, currentCharacter.score);
         }
+
+
+        socket.on("update position", function(id, x, y) {
+          characters.get(id).x = x;
+          characters.get(id).y = y;
+        });
 
         socket.emit("confirm updated", '');
 
         io.emit("message", "New user's name is: " + name + ". Welcome!");
-        io.emit("new user", newUser.id, newUser.name, newUser.character.x, newUser.character.y, newUser.character.score);
+        io.emit("update character", newUser.id, newUser.name, newUser.character.x, newUser.character.y, newUser.character.velocity, newUser.character.score);
+
+        socket.emit("set user myCharacter", true);
 
 
-
-        console.log(characters.length);
+        console.log(characters.size);
     });
 });
 
@@ -121,10 +129,10 @@ server.listen(40378);
 console.log("Socket is listening!");
 
 function gameSingleFrame() {
-  for (var i = 0; i < characters.length; i++){
-    var currentCharacter = characters[i];
-    io.emit("update character", i, currentCharacter.id, currentCharacter.name, currentCharacter.x, currentCharacter.y, currentCharacter.score);
+  for (let [k, v] of characters){
+    var currentCharacter = v;
+    io.emit("update character", currentCharacter.id, currentCharacter.name, currentCharacter.x, currentCharacter.y, currentCharacter.velocity, currentCharacter.score);
   }
 }
 
-setInterval(gameSingleFrame, 100);
+setInterval(gameSingleFrame, 33);

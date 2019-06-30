@@ -32,20 +32,87 @@
 
         <script>
 
-        var characterDatas = [];
-        var myIndex = -1;
-        function CharacterData(id, name, x, y, score) {
+        //https://stackoverflow.com/questions/5203407/how-to-detect-if-multiple-keys-are-pressed-at-once-using-javascript
+        var keyMap = {}; // You could also use an array
+        onkeydown = onkeyup = function(e){
+            e = e || event; // to deal with IE
+            keyMap[e.keyCode] = e.type == 'keydown';
+            /* insert conditional here */
+        }
+
+        var characterDatas = new Map();
+        var myID = -1;
+        var myCharacter;
+
+        function CharacterData(id, name, x, y, score, velocity) {
           this.id = id;
           this.x = x;
           this.y = y;
           this.name = name;
           this.score = score;
+          this.vx = 0;
+          this.vy = 0;
+          this.velocity = velocity;
         }
 
+        CharacterData.prototype.movement = function() {
 
+            this.slowDownVertical();
+            this.slowDownHorizontal();
+            if (keyMap[87]) {
+              this.moveUp();
+            }
+            if (keyMap[83]) {
+              this.moveDown();
+            }
+            if (keyMap[65]) {
+              this.moveLeft();
+            }
+            if (keyMap[68]) {
+              this.moveRight();
+            }
+            this.x += this.vx;
+            this.y += this.vy;
 
+            this.sendPositionToServer();
+        }
 
+        CharacterData.prototype.sendPositionToServer = function  () {
+          socket.emit('update position', this.id, this.x, this.y);
+        }
 
+        CharacterData.prototype.slowDownHorizontal = function() {
+          if (Math.abs(this.vx) > 0.01){
+              this.vx *= 0.9;
+          } else {
+              this.vx = 0;
+          }
+        }
+
+        CharacterData.prototype.slowDownVertical = function() {
+          if (Math.abs(this.vy) > 0.01){
+              this.vy *= 0.9;
+          } else {
+              this.vy = 0;
+          }
+        }
+
+        CharacterData.prototype.moveUp = function() {
+          this.vy += (-this.velocity - this.vy) / 10;
+
+        }
+
+        CharacterData.prototype.moveDown = function() {
+          this.vy += (this.velocity - this.vy) / 10;
+        }
+
+        CharacterData.prototype.moveLeft = function() {
+          this.vx += (-this.velocity - this.vx) / 10;
+        }
+
+        CharacterData.prototype.moveRight = function() {
+          this.vx += (this.velocity - this.vx) / 10;
+        }
 
 
 
@@ -60,45 +127,46 @@
 
         var updated = false;
 
-        var socket = io.connect('shockwave-io.com:40378');
+        var socket = io.connect('localhost:40378');
         socket.on('message', function(message) {
             document.getElementById("messages").innerHTML += message +"<br/>";
         });
 
 
-        socket.on('init synchronization',function(length) {
-          for (var i = 0; i < length; i++) {
-            characterDatas.push(new CharacterData());
-          }
-          myIndex = length - 1;
+        socket.on('init synchronization',function(id) {
+          myID = id;
         });
 
-        socket.on('update character', function(i, id, name, x, y, score) {
-          if (characterDatas.length - 1 >= i){
-            characterDatas[i].id = id;
-            characterDatas[i].name = name;
-            characterDatas[i].x = x;
-            characterDatas[i].y = y;
-            characterDatas[i].score = score;
+        socket.on('set user myCharacter', function(bool) {
+            myCharacter = characterDatas.get(myID);
+        });
+
+        socket.on('update character', function(id, name, x, y, vel, score) {
+          var currentCharacter = characterDatas.get(id);
+          if (currentCharacter != null)
+          {
+            currentCharacter.id = id;
+            currentCharacter.name = name;
+            currentCharacter.x = x;
+            currentCharacter.y = y;
+            currentCharacter.score = score;
+            currentCharacter.velocity = vel;
+          } else {
+              characterDatas.set(id, new CharacterData(id, name, x, y, vel, score));
           }
         });
 
-        socket.on('new user', function(id, name, x, y, score) {
-          if (id != characterDatas[myIndex].id){
-            characterDatas.push(new CharacterData(id, name, x, y, score));
-          }
-        });
+        /*socket.on("update user movement", function(index,) {
+
+        });*/
+
 
         socket.on("confirm updated", function(str) {
-          alert("updated!");
           updated = true;
         });
 
-        socket.on("delete user", function(i) {
-          characterDatas.splice(i, 1);
-          if (i < myIndex) {
-              myIndex--;
-          }
+        socket.on("delete user", function(id) {
+          characterDatas.delete(id);
         });
 
         var givenName = false;
@@ -131,32 +199,41 @@
 
               ctx.font = "30px Arial";
               //ctx.fillText("Hello I'm a test canvas", 10, 50);
-              for (var i = 0; i < characterDatas.length; i++){
+              for (let [k, v] of characterDatas){
+                var currentCharacter = v;
                 ctx.beginPath();
-                ctx.arc(characterDatas[i].x, characterDatas[i].y, 80, 0, 2 * Math.PI);
+                ctx.arc(currentCharacter.x, currentCharacter.y, 30, 0, 2 * Math.PI);
                 ctx.stroke();
                 ctx.font = "30px Arial";
 
-                ctx.strokeText(characterDatas[i].name + ": " + characterDatas[i].score, characterDatas[i].x, characterDatas[i].y);
+                ctx.strokeText(currentCharacter.name, currentCharacter.x, currentCharacter.y);
               }
         }
 
         function incrementScore(){
-            characterDatas[myIndex].score += 3;
-            socket.emit("update score", myIndex, characterDatas[myIndex].score);
+            characterDatas.get(myID).score += 3;
+            socket.emit("update score", myID, myCharacter.score);
         }
 
         document.getElementById("myCanvas").addEventListener("click", incrementScore, false);
 
 
 
+        document.addEventListener('keydown', function(event){
+        });
 
-        setInterval(drawCanvas, 100);
+        function gameSingleFrame() {
+            drawCanvas();
+            myCharacter.movement();
+
+        }
+
+        setInterval(gameSingleFrame, 33);
 
         function getStats() {
-          alert("Character data length: " + characterDatas.length + "\n");
-          for (var i = 0; i < characterDatas.length; i++){
-            alert(i + "th character: " + characterDatas[i].x + ", " + characterDatas[i].y + "," + characterDatas[i].score);
+          alert("Character data length: " + characterDatas.size + "\n");
+          for (let [k, v] of characterDatas){
+            alert("character with id" + k + ": "+ v.x + ", " + v.y + "," + v.score);
           }
         }
         </script>
