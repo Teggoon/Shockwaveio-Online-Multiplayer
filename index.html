@@ -83,7 +83,7 @@
               this.moveRight();
             }
 
-            /*if (keyMap[32] && this.onGround) {
+            if (keyMap[32] && this.onGround) {
                 this.onGround = false;
                 this.vz = 0.06;
             }
@@ -97,7 +97,7 @@
                 this.vz = 0;
                 this.onGround = true;
             }
-            */
+
 
             this.x += this.vx;
             this.y += this.vy;
@@ -254,12 +254,23 @@
               //ctx.fillText("Hello I'm a test canvas", 10, 50);
               for (let [k, v] of characterDatas){
                 var currentCharacter = v;
+                var scaleSize = 1 + currentCharacter.z;
+                var shift = 3 + (currentCharacter.z) * 20;
                 ctx.beginPath();
-                ctx.arc(currentCharacter.x, currentCharacter.y, 30, 0, 2 * Math.PI);
-                ctx.stroke();
-                ctx.font = "30px Arial";
+                ctx.arc(currentCharacter.x + shift, currentCharacter.y - shift, 20 * scaleSize, 0, 2 * Math.PI);
 
-                ctx.strokeText(currentCharacter.name + ": "+currentCharacter.z, currentCharacter.x, currentCharacter.y);
+                ctx.fillStyle = 'rgba(0,0,0,0.2)';
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.arc(currentCharacter.x, currentCharacter.y, 20 * scaleSize, 0, 2 * Math.PI);
+                ctx.strokeStyle = 'rgba(0,0,0,0.7)';
+                ctx.fillStyle = 'rgba(255,255,2355,1)';
+                ctx.fill();
+                ctx.stroke();
+                ctx.font = "20px Arial";
+
+                ctx.strokeText(currentCharacter.name, currentCharacter.x - 20, currentCharacter.y - 34);
               }
         }
 
