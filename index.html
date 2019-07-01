@@ -44,15 +44,26 @@
         var myID = -1;
         var myCharacter;
 
-        function CharacterData(id, name, x, y, score, velocity) {
+        function CharacterData(id, name, x, y, z, score, velocity) {
           this.id = id;
-          this.x = x;
+          this.x = -1000;
           this.y = y;
+          this.z = z;
           this.name = name;
           this.score = score;
           this.vx = 0;
           this.vy = 0;
+          this.vz = 0;
           this.velocity = velocity;
+          this.onGround = true;
+        }
+
+        CharacterData.prototype.acceptPositionUpdate = function(x, y, z, vel) {
+          this.x = x;
+          this.y = y;
+          this.z = z;
+          this.velocity = vel;
+          this.onGround = (z <= 0);
         }
 
         CharacterData.prototype.movement = function() {
@@ -71,14 +82,34 @@
             if (keyMap[68]) {
               this.moveRight();
             }
+
+            /*if (keyMap[32] && this.onGround) {
+                this.onGround = false;
+                this.vz = 0.06;
+            }
+
+            if (!this.onGround) {
+                this.vz -= 0.003;
+                this.z += this.vz;
+            }
+            if (this.z < 0) {
+                this.z = 0;
+                this.vz = 0;
+                this.onGround = true;
+            }
+            */
+
             this.x += this.vx;
             this.y += this.vy;
 
-            this.sendPositionToServer();
+
+            if (Math.abs(this.vx) > 0.01 || Math.abs(this.vy) > 0.01){
+                this.sendPositionToServer();
+            }
         }
 
         CharacterData.prototype.sendPositionToServer = function  () {
-          socket.emit('update position', this.id, this.x, this.y);
+          socket.emit('update position', this.id, this.x, this.y, this.z);
         }
 
         CharacterData.prototype.slowDownHorizontal = function() {
@@ -141,25 +172,47 @@
             myCharacter = characterDatas.get(myID);
         });
 
-        socket.on('update character', function(id, name, x, y, vel, score) {
+        //for updating a character on the client side when the character may
+        //not have been constructed yet
+        socket.on('update new character', function(id, name, x, y, z, vel, score) {
+
+          //try to get the character in the map with this id
           var currentCharacter = characterDatas.get(id);
-          if (currentCharacter != null)
+
+          //if there is no such character, make new
+          if (currentCharacter == null)
           {
-            currentCharacter.id = id;
-            currentCharacter.name = name;
-            currentCharacter.x = x;
-            currentCharacter.y = y;
-            currentCharacter.score = score;
-            currentCharacter.velocity = vel;
+              characterDatas.set(id, new CharacterData(id, name, x, y, z, vel, score));
           } else {
-              characterDatas.set(id, new CharacterData(id, name, x, y, vel, score));
+
+              currentCharacter.score = score;
+              currentCharacter.acceptPositionUpdate(x, y, z, vel);
           }
         });
 
-        /*socket.on("update user movement", function(index,) {
+        //for updating a character stats on the client side when it's already initialized
+        //stats: weapon stats, score,
+        socket.on('update stats', function(id, score) {
 
-        });*/
+          var currentCharacter = characterDatas.get(id);
+          if (currentCharacter != null)
+          {
+            currentCharacter.score = score;
+          }
+        });
+        //for updating a character stats on the client side when it's already initialized
+        //stats: weapon stats, score,
+        socket.on('update position', function(id, x, y, z, vel) {
 
+          if (id == myID && this.x != -1000) {
+            return;
+          }
+          var currentCharacter = characterDatas.get(id);
+          if (currentCharacter != null)
+          {
+            currentCharacter.acceptPositionUpdate(x, y, z, vel);
+          }
+        });
 
         socket.on("confirm updated", function(str) {
           updated = true;
@@ -206,7 +259,7 @@
                 ctx.stroke();
                 ctx.font = "30px Arial";
 
-                ctx.strokeText(currentCharacter.name, currentCharacter.x, currentCharacter.y);
+                ctx.strokeText(currentCharacter.name + ": "+currentCharacter.z, currentCharacter.x, currentCharacter.y);
               }
         }
 
@@ -224,11 +277,13 @@
 
         function gameSingleFrame() {
             drawCanvas();
-            myCharacter.movement();
+            if (characterDatas.get(myID) != null) {
+              characterDatas.get(myID).movement();
+            }
 
         }
 
-        setInterval(gameSingleFrame, 33);
+        setInterval(gameSingleFrame, 24);
 
         function getStats() {
           alert("Character data length: " + characterDatas.size + "\n");

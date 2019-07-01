@@ -38,6 +38,7 @@ function Character (id, name, user, x, y) {
     this.user = user;
     this.x = x;
     this.y = y;
+    this.z = 0;
     this.score = 0;
     this.name = name;
     this.vx = 0;
@@ -90,6 +91,14 @@ io.on('connection', function(socket){
 
     });
 
+
+    socket.on("update position", function(id, x, y, z) {
+      var currentCharacter = characters.get(id);
+      currentCharacter.x = x;
+      currentCharacter.y = y;
+      currentCharacter.z = z;
+    });
+
     socket.on('name', function(name) {
         console.log("new user's name is" + name);
         idCounter++;
@@ -102,19 +111,17 @@ io.on('connection', function(socket){
 
         for (let [k, v] of characters) {
           var currentCharacter = v;
-          socket.emit("update character", k, currentCharacter.name, currentCharacter.x, currentCharacter.y, currentCharacter.velocity, currentCharacter.score);
+          socket.emit("update new character", k, currentCharacter.name, currentCharacter.x, currentCharacter.y, currentCharacter.z, currentCharacter.velocity, currentCharacter.score);
         }
 
+        var newCharacter = newUser.character;
 
-        socket.on("update position", function(id, x, y) {
-          characters.get(id).x = x;
-          characters.get(id).y = y;
-        });
 
         socket.emit("confirm updated", '');
 
         io.emit("message", "New user's name is: " + name + ". Welcome!");
-        io.emit("update character", newUser.id, newUser.name, newUser.character.x, newUser.character.y, newUser.character.velocity, newUser.character.score);
+
+        io.emit("update new character", newUser.id, newUser.name, newCharacter.x, newCharacter.y, newCharacter.z, newCharacter.velocity, newCharacter.score);
 
         socket.emit("set user myCharacter", true);
 
@@ -131,8 +138,9 @@ console.log("Socket is listening!");
 function gameSingleFrame() {
   for (let [k, v] of characters){
     var currentCharacter = v;
-    io.emit("update character", currentCharacter.id, currentCharacter.name, currentCharacter.x, currentCharacter.y, currentCharacter.velocity, currentCharacter.score);
+    io.emit("update stats", currentCharacter.id, currentCharacter.score);
+    io.emit("update position", currentCharacter.id, currentCharacter.x, currentCharacter.y, currentCharacter.z, currentCharacter.velocity);
   }
 }
 
-setInterval(gameSingleFrame, 33);
+setInterval(gameSingleFrame, 24);
