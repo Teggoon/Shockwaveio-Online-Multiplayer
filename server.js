@@ -21,7 +21,13 @@ var server = http.createServer(function(req, res) {
 var socketUserMap = new Map();
 
 var characters = new Map();
+var shockwaves = new Map();
 var idCounter = 1;
+var shockwaveCounter = 1;
+
+function dist(x1, y1, x2, y2) {
+  return Math.sqrt(Math.sq(x2 - x1) + Math.sq(y2 - y1));
+}
 
 function User (id, name, sock) {
     this.name = name;
@@ -39,12 +45,47 @@ function Character (id, name, user, x, y) {
     this.x = x;
     this.y = y;
     this.z = 0;
+    this.r = 0;
     this.score = 0;
     this.name = name;
     this.vx = 0;
     this.vy = 0;
     this.velocity = 10;
+    this.life = 100;
 }
+
+function Shockwave (id, shockwaveID, x, y, angle, angleWidth, velocity, tV) {
+    this.angle = angle;
+    this.angleWidth = angleWidth;
+    this.x=x;
+    this.y=y;
+    this.velocity = velocity;
+    this.transparency = 185;
+    this.transparencyV = tV;
+    this.width = 0;
+    this.id = id;
+    this.shockwaveID = shockwaveID;
+}
+Shockwave.prototype.move = function () {
+    this.transparency -= this.transparencyV;
+    this.width += this.velocity;
+};
+
+Shockwave.prototype.collision = function (p) {
+    if (p.id == this.id){
+        return;
+    }
+
+    var angleToP = Math.atan2(p.y - this.y,p.x - this.x);
+    var angleDifference = (angleToP - this.angle);
+    if (p.z <= 0 && Math.abs(angleDifference) <= this.width/2 &&
+    Math.abs(dist(this.x,this.y,p.x,p.y) - (this.xWidth/2 + 5)) < 10){
+        p.vx = cos(this.angle) * 3;
+        p.vy = sin(this.angle) * 3;
+        p.life -= 5;
+    }
+
+};
 
 // Loading socket.io
 var io = require('socket.io').listen(server);
@@ -81,22 +122,35 @@ io.on('connection', function(socket){
       io.emit("message", socketUserMap.get(socket).name + ": " + msg);
     });
 
-    socket.on("update score", function(id, score) {
+    socket.on("update stats", function(id, score, life) {
       console.log(id);
       console.log(characters.size);
-        characters.get(id).score = score;
+      var currentCharacter = characters.get(id);
+      currentCharacter.score = score;
+      currentCharacter.life = life;
     });
 
-    socket.on("user move up", function(index){
 
+
+    socket.on("add shockwave", function(id, x, y, angle, angleWidth, velocity, tV) {
+      console.log("Shockwave requested!");
+      if (shockwaves.get(id) == null) {
+            shockwaves.set(id, []);
+      }
+      else
+      {
+        shockwaves.get(id).push(new Shockwave(id, shockwaveCounter, x, y, angle, angleWidth, velocity, tV));
+        shockwaveCounter++;
+      }
+      console.log("shockwave size: " + shockwaves.get(id).length) ;
     });
 
-
-    socket.on("update position", function(id, x, y, z) {
+    socket.on("update position", function(id, x, y, z, r) {
       var currentCharacter = characters.get(id);
       currentCharacter.x = x;
       currentCharacter.y = y;
       currentCharacter.z = z;
+      currentCharacter.r = r;
     });
 
     socket.on('name', function(name) {
@@ -109,20 +163,23 @@ io.on('connection', function(socket){
 
         socket.emit("init synchronization", idCounter);
 
-        for (let [k, v] of characters) {
-          var currentCharacter = v;
-          socket.emit("update new character", k, currentCharacter.name, currentCharacter.x, currentCharacter.y, currentCharacter.z, currentCharacter.velocity, currentCharacter.score);
+        //update new user with info on the room's all players
+        for (let [k, c] of characters) {
+          socket.emit("update new character", k, c.name, c.x, c.y, c.z, c.r, c.velocity, c.score);
         }
 
-        var newCharacter = newUser.character;
+        var nC = newUser.character;
 
 
         socket.emit("confirm updated", '');
 
+        //Tell everybody who the new user's name is
         io.emit("message", "New user's name is: " + name + ". Welcome!");
 
-        io.emit("update new character", newUser.id, newUser.name, newCharacter.x, newCharacter.y, newCharacter.z, newCharacter.velocity, newCharacter.score);
+        //update everybody (including new user) on new user's info
+        io.emit("update new character", newUser.id, newUser.name, nC.x, nC.y, nC.z, nC.r, nC.velocity, nC.score);
 
+        //makes new user set myCharacter variable
         socket.emit("set user myCharacter", true);
 
 
@@ -136,11 +193,33 @@ server.listen(40378);
 console.log("Socket is listening!");
 
 function gameSingleFrame() {
-  for (let [k, v] of characters){
-    var currentCharacter = v;
-    io.emit("update stats", currentCharacter.id, currentCharacter.score);
-    io.emit("update position", currentCharacter.id, currentCharacter.x, currentCharacter.y, currentCharacter.z, currentCharacter.velocity);
+  for (let [k, c] of characters){
+    //update all clients of all players
+    io.emit("update stats", c.id, c.score, c.life);
+    io.emit("update position", c.id, c.x, c.y, c.z, c.r, c.velocity);
   }
+
+  //update all clients of all shockwaves
+  for (let [ks, a] of shockwaves) {
+    //ks is a shockwave list's key (ID)
+    //a is a list of shockwaves with the same ID
+    for (var i = 0; i < a.length; i++) {
+      //loop through shockwaves in the list
+
+      //s = individual shockwave
+      var s = a[i];
+      s.move();
+      for (let [kc, c] of characters) {
+        //kc = character's
+        //c = individual character
+        //s.collision(c);
+      }
+      io.emit("update shockwave", s.id, s.shockwaveID, s.x, s.y, s.angle, s.width, s.velocity, s.transparencyV);
+
+    }
+
+      }
+
 }
 
 setInterval(gameSingleFrame, 24);
