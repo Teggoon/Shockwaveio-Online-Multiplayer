@@ -1,6 +1,12 @@
 var http = require('http');
 var fs = require('fs');
 
+
+/**IMPORTANT GAME VARIABLES HERE*/
+const MAP_SIZE = 2000;
+const HOLE_NUM = 30;
+
+
 var canvasWidth = 750;
 var canvasHeight = 450;
 
@@ -20,25 +26,54 @@ var server = http.createServer(function(req, res) {
 
 var socketUserMap = new Map();
 
-var characters = new Map();
-var shockwaves = new Map();
-var idCounter = 1;
-var shockwaveCounter = 1;
+var characters = new Map(); //map of each character
+var shockwaves = new Map(); //map of all the shockwaves
+var idCounter = 1; //counter for user's ID
+var shockwaveCounter = 1; //counter for shockwave's ID
 
+/**
+@param: first item's x position
+@param: first item's y position
+@param: second item's x position
+@param: second item's y position
+@return the distance between them on the Cartesian plane
+*/
 function dist(x1, y1, x2, y2) {
   return Math.sqrt(Math.sq(x2 - x1) + Math.sq(y2 - y1));
 }
 
+
+/**
+CLASS User
+Constructor:
+@param: integer ID
+@param: name of the user
+@param: the socket connection of the user
+*/
 function User (id, name, sock) {
     this.name = name;
     this.socket = sock;
     this.id = id;
     var spawnLocationX = Math.random() * canvasWidth;
     var spawnLocationY = Math.random() * canvasHeight;
+
+    //make a new character for the user
     this.character = new Character(id, name, this, spawnLocationX, spawnLocationY);
     this.score = 0;
 }
 
+
+
+/**
+CLASS Character:
+An in-game character belonging to a user.
+Constructor:
+@param: integer ID
+@param: name of the character
+@param: the user object it belongs to
+@param: initial x position
+@param: initial y position
+*/
 function Character (id, name, user, x, y) {
     this.id = id;
     this.user = user;
@@ -53,6 +88,15 @@ function Character (id, name, user, x, y) {
     this.velocity = 10;
     this.life = 100;
 }
+Character.prototype.acceptPositionUpdate = function(x, y, z, r) {
+  this.x = x;
+  this.y = y;
+  this.z = z;
+  this.r = r;
+}
+
+
+
 
 function Shockwave (id, shockwaveID, x, y, angle, angleWidth, velocity, tV) {
     this.angle = angle;
@@ -72,7 +116,7 @@ Shockwave.prototype.move = function () {
 };
 
 Shockwave.prototype.collision = function (p) {
-    if (p.id == this.id){
+    if (p.id == this.id) {
         return;
     }
 
@@ -87,15 +131,20 @@ Shockwave.prototype.collision = function (p) {
 
 };
 
+/**
+VICTORIA start
+*/
+
+
+/**
+VICTORIA end
+*/
+
+
 // Loading socket.io
 var io = require('socket.io').listen(server);
 
-// When a client connects, we note it in the console
-/*io.sockets.on('connection', function (socket) {
-    console.log('A client is connected to the socket!');
-    socket.emit("message", "Welcome client, this is the server.");
-});
-*/
+
 
 io.on('connection', function(socket){
   console.log('a user connected');
@@ -147,12 +196,12 @@ io.on('connection', function(socket){
 
     socket.on("update position", function(id, x, y, z, r) {
       var currentCharacter = characters.get(id);
-      currentCharacter.x = x;
-      currentCharacter.y = y;
-      currentCharacter.z = z;
-      currentCharacter.r = r;
+      currentCharacter.acceptPositionUpdate(x,y,z,r);
     });
 
+
+
+    //NEW USER
     socket.on('name', function(name) {
         console.log("new user's name is" + name);
         idCounter++;
@@ -183,6 +232,9 @@ io.on('connection', function(socket){
         socket.emit("set user myCharacter", true);
 
 
+        /**VICTORIA start*/
+
+        /**VICTORIA end*/
         console.log(characters.size);
     });
 });
@@ -192,12 +244,26 @@ io.on('connection', function(socket){
 server.listen(40378);
 console.log("Socket is listening!");
 
+
+/**
+Everything in here runs every frame of the game
+*/
 function gameSingleFrame() {
+
+  /**
+  VICTORIA start
+  */
+
+  /**
+  VICTORIA end
+  */
+
   for (let [k, c] of characters){
     //update all clients of all players
     io.emit("update stats", c.id, c.score, c.life);
     io.emit("update position", c.id, c.x, c.y, c.z, c.r, c.velocity);
   }
+
 
   //update all clients of all shockwaves
   for (let [ks, a] of shockwaves) {
@@ -218,8 +284,11 @@ function gameSingleFrame() {
 
     }
 
-      }
+  }
+
+
 
 }
 
+//run above function once every 24 milliseconds
 setInterval(gameSingleFrame, 24);

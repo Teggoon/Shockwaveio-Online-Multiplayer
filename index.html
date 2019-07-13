@@ -35,19 +35,25 @@
         <script>
 
 //https://stackoverflow.com/questions/5203407/how-to-detect-if-multiple-keys-are-pressed-at-once-using-javascript
-var keyMap = {}; // You could also use an array
+
+var canvasWidth = 750;
+var canvasHeight = 450;
+
+var keyMap = {};
 onkeydown = onkeyup = function(e){
-    e = e || event; // to deal with IE
+    e = e || event;
     keyMap[e.keyCode] = e.type == 'keydown';
-    /* insert conditional here */
 }
 
+var holes = [];
 var characterDatas = new Map();
 var shockwaves = new Map();
 var myID = -1;
 var myCharacter;
 var mouseX = 0;
 var mouseY = 0;
+var c = document.getElementById("myCanvas");
+
 
 //from https://nerdparadise.com/programming/javascriptmouseposition
 function updateMouse(mouseEvent) {
@@ -100,6 +106,34 @@ function CharacterData(id, name, x, y, z, r, score, velocity) {
   this.reloadSpeed = 0.1;
 }
 
+CharacterData.prototype.display = function(ctx, x, y) {
+  var scaleSize = 1 + this.z;
+  var shift = 3 + (this.z) * 20;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.save();
+  ctx.translate(1 + shift, -1 - shift);
+  ctx.rotate(this.r);
+  ctx.beginPath();
+  ctx.rect(-10,-10, 20 * scaleSize, 20 * scaleSize);
+
+  ctx.fillStyle = 'rgba(0,0,0,0.2)';
+  ctx.fill();
+  ctx.restore();
+  ctx.save();
+  ctx.rotate(this.r);
+  ctx.beginPath();
+  ctx.rect(-10,-10, 20 * scaleSize, 20 * scaleSize);
+  ctx.strokeStyle = 'rgba(0,0,0,0.7)';
+  ctx.fillStyle = 'rgba(255,255,2355,1)';
+  ctx.fill();
+  ctx.stroke();
+  ctx.restore();
+  ctx.font = "20px Arial";
+  ctx.strokeText(this.name, - 20, - 34);
+  ctx.restore();
+};
+
 CharacterData.prototype.acceptPositionUpdate = function(x, y, z, r, vel) {
   this.x = x;
   this.y = y;
@@ -115,7 +149,7 @@ CharacterData.prototype.acceptStatsUpdate = function(score, life) {
 };
 
 CharacterData.prototype.movement = function() {
-    this.r = Math.atan2(mouseY - this.y, mouseX - this.x);
+    this.r = Math.atan2(mouseY - canvasHeight / 2, mouseX - canvasWidth / 2);
     this.reload += this.reloadSpeed;
     this.slowDownVertical();
     this.slowDownHorizontal();
@@ -198,9 +232,6 @@ CharacterData.prototype.moveRight = function() {
   this.vx += (this.velocity - this.vx) / 10;
 }
 
-CharacterData.prototype.createNewShockwave = function() {
-
-};
 
 
 function Shockwave (id, shockwaveID, x, y, angle, angleWidth, velocity, tV) {
@@ -229,7 +260,15 @@ Shockwave.prototype.acceptPositionUpdate = function(width){
   this.width = width;
 }
 
+/**
+VICTORIA start
+*/
 
+
+
+/**
+VICTORIA end
+*/
 
 
 
@@ -320,6 +359,10 @@ socket.on("update shockwave", function(id, shockwaveID, x, y, angle, width, velo
 
 });
 
+/**VICTORIA start*/
+
+/**VICTORIA end*/
+
 var givenName = false;
 function sendStuff() {
 
@@ -339,52 +382,35 @@ function sendStuff() {
 /**Socket.io connection handler portion ENDS*/
 
 
-var c = document.getElementById("myCanvas");
 //should be updated == TRUE, temporarily this
 function drawCanvas () {
       var ctx = c.getContext("2d");
       ctx.beginPath();
-      ctx.rect(0, 0, 750, 450);
+      ctx.rect(0, 0, canvasWidth, canvasHeight);
       ctx.fillStyle = "white";
       ctx.fill();
 
       ctx.font = "30px Arial";
+
+      ctx.save();
+      ctx.translate(canvasWidth/2 - myCharacter.x, canvasHeight/2 - myCharacter.y);
+
       //ctx.fillText("Hello I'm a test canvas", 10, 50);
-      for (let [k, v] of characterDatas){
-        var currentCharacter = v;
-        var scaleSize = 1 + currentCharacter.z;
-        var shift = 3 + (currentCharacter.z) * 20;
-
-        ctx.save();
-        ctx.translate(currentCharacter.x, currentCharacter.y);
-        ctx.save();
-        ctx.translate(1 + shift, -1 - shift);
-        ctx.rotate(currentCharacter.r);
-        ctx.beginPath();
-        ctx.rect(-10,-10, 20 * scaleSize, 20 * scaleSize);
-        //ctx.arc(0, 0, 20 * scaleSize, 0, 2 * Math.PI);
-
-        ctx.fillStyle = 'rgba(0,0,0,0.2)';
-        ctx.fill();
-        ctx.restore();
-        ctx.save();
-        ctx.rotate(currentCharacter.r);
-
-        ctx.beginPath();
-        ctx.rect(-10,-10, 20 * scaleSize, 20 * scaleSize);
-        ctx.strokeStyle = 'rgba(0,0,0,0.7)';
-        ctx.fillStyle = 'rgba(255,255,2355,1)';
-        ctx.fill();
-
-        ctx.stroke();
-        ctx.restore();
-        ctx.font = "20px Arial";
-
-        ctx.strokeText(currentCharacter.name, - 20, - 34);
-
-        ctx.restore();
+      for (let [k, c] of characterDatas) {
+        if (k != myID) {
+          c.display(ctx, c.x, c.y);
+        }
       }
+      ctx.restore();
 
+      ctx.save();
+      myCharacter.display(ctx, canvasWidth / 2, canvasHeight / 2);
+      ctx.restore();
+
+
+      ctx.save();
+      ctx.translate(canvasWidth/2 - myCharacter.x, canvasHeight/2 - myCharacter.y);
+      //display all shockwaves
       for (let [k, v] of shockwaves){
           ctx.save();
           for (let [ks, s] of v){
@@ -392,6 +418,11 @@ function drawCanvas () {
           }
           ctx.restore();
       }
+      ctx.restore();
+
+      /**VICTORIA start*/
+
+      /**VICTORIA end*/
 
       ctx.font = "20px Arial";
 
