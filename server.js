@@ -99,7 +99,7 @@ Character.prototype.acceptPositionUpdate = function(x, y, z, r) {
 
 
 
-
+//JELAN
 function Shockwave (id, shockwaveID, x, y, angle, angleWidth, velocity, tV) {
     this.angle = angle;
     this.angleWidth = angleWidth;
