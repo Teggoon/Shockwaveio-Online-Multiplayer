@@ -27,6 +27,7 @@ var server = http.createServer(function(req, res) {
 var socketUserMap = new Map();
 
 var characters = new Map(); //map of each character
+//JELAN
 var shockwaves = new Map(); //map of all the shockwaves
 var idCounter = 1; //counter for user's ID
 var shockwaveCounter = 1; //counter for shockwave's ID
@@ -38,6 +39,7 @@ var shockwaveCounter = 1; //counter for shockwave's ID
 @param: second item's y position
 @return the distance between them on the Cartesian plane
 */
+//JELAN
 function dist(x1, y1, x2, y2) {
   return Math.sqrt(Math.sq(x2 - x1) + Math.sq(y2 - y1));
 }
@@ -140,6 +142,10 @@ VICTORIA start
 VICTORIA end
 */
 
+//JELAN temporary documentation of Hole (to be implemented):
+//this.x
+//this.y
+//this.size (the diameter)
 /**MAREHAN/JELAN start*/
 
 /**MAREHAN/JELAN end*/
