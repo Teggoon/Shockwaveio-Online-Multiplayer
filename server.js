@@ -40,7 +40,7 @@ var shockwaveCounter = 1; //counter for shockwave's ID
 @param: second item's y position
 @return the distance between them on the Cartesian plane
 */
-//JELAN
+//JELAN, KEVIN
 function dist(x1, y1, x2, y2) {
   return Math.sqrt(Math.sq(x2 - x1) + Math.sq(y2 - y1));
 }
@@ -100,7 +100,7 @@ Character.prototype.acceptPositionUpdate = function(x, y, z, r) {
 
 
 
-//JELAN
+//JELAN, KEVIN
 function Shockwave (id, shockwaveID, x, y, angle, angleWidth, velocity, tV) {
     this.angle = angle;
     this.angleWidth = angleWidth;
