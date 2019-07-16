@@ -359,6 +359,10 @@ socket.on("update shockwave", function(id, shockwaveID, x, y, angle, width, velo
 
 });
 
+socket.on("kill shockwave", function(id, shockwaveID) {
+    shockwaves.get(id).delete(shockwaveID);
+});
+
 /**VICTORIA start*/
 
 /**VICTORIA end*/

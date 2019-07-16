@@ -106,7 +106,7 @@ function Shockwave (id, shockwaveID, x, y, angle, angleWidth, velocity, tV) {
     this.x=x;
     this.y=y;
     this.velocity = velocity;
-    this.transparency = 185;
+    this.transparency = 255;
     this.transparencyV = tV;
     this.width = 0;
     this.id = id;
@@ -132,6 +132,13 @@ Shockwave.prototype.collision = function (p) {
     }
 
 };
+Shockwave.prototype.checkDie = function() {
+  if (this.transparency <= 0) {
+    return true;
+  }
+  return false;
+};
+
 
 /**
 VICTORIA start
@@ -195,11 +202,9 @@ io.on('connection', function(socket){
       if (shockwaves.get(id) == null) {
             shockwaves.set(id, []);
       }
-      else
-      {
-        shockwaves.get(id).push(new Shockwave(id, shockwaveCounter, x, y, angle, angleWidth, velocity, tV));
-        shockwaveCounter++;
-      }
+      shockwaves.get(id).push(new Shockwave(id, shockwaveCounter, x, y, angle, angleWidth, velocity, tV));
+      shockwaveCounter++;
+
       console.log("shockwave size: " + shockwaves.get(id).length) ;
     });
 
@@ -254,6 +259,24 @@ server.listen(40378);
 console.log("Socket is listening!");
 
 
+function checkDeleteShockwaves() {
+  for (let [ks, a] of shockwaves) {
+    //ks is a shockwave list's key (ID)
+    //a is a list of shockwaves with the same ID
+    for (var i = 0; i < a.length; i++) {
+      //s = individual shockwave
+      var s = a[i];
+      if (s.checkDie()) {
+          io.emit("kill shockwave", s.id, s.shockwaveID);
+          a.splice(i, 1);
+          console.log(a.length);
+      }
+    }
+  }
+}
+
+
+
 /**
 Everything in here runs every frame of the game
 */
@@ -284,6 +307,9 @@ function gameSingleFrame() {
       //s = individual shockwave
       var s = a[i];
       s.move();
+
+
+
       for (let [kc, c] of characters) {
         //kc = character's
         //c = individual character
@@ -294,6 +320,8 @@ function gameSingleFrame() {
     }
 
   }
+
+  checkDeleteShockwaves();
 
 
 
