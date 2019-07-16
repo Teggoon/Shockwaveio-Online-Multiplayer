@@ -3,12 +3,13 @@ var fs = require('fs');
 
 
 /**IMPORTANT GAME VARIABLES HERE*/
+//KEVIN
 const MAP_SIZE = 2000;
 const HOLE_NUM = 30;
 
 
-var canvasWidth = 750;
-var canvasHeight = 450;
+var canvasWidth = 890;
+var canvasHeight = 500;
 
 /*
 * https://openclassrooms.com/en/courses/2504541-ultra-fast-applications-using-node-js/2505653-socket-io-let-s-go-to-real-time
@@ -132,13 +133,24 @@ Shockwave.prototype.collision = function (p) {
     }
 
 };
+/**
+Check if current shockwave should be deleted
+*/
 Shockwave.prototype.checkDie = function() {
   if (this.transparency <= 0) {
     return true;
   }
+  /**KEVIN start*/
+
+  /**KEVIN end*/
+
   return false;
 };
-Shockwave.prototype.kill = function() {
+
+/**
+Function that sends instruction to all clients to delete current shockwave
+*/
+Shockwave.prototype.killOnClient = function() {
   io.emit("kill shockwave", this.id, this.shockwaveID);
 };
 
@@ -166,7 +178,6 @@ var io = require('socket.io').listen(server);
 
 io.on('connection', function(socket){
   console.log('a user connected');
-  io.emit("message", "A new user has joined the chat, pending name input");
 
 
     socket.on('disconnect', function(){
@@ -219,7 +230,7 @@ io.on('connection', function(socket){
 
     //NEW USER
     socket.on('name', function(name) {
-        console.log("new user's name is" + name);
+        console.log("new user's name is: " + name);
         idCounter++;
         var newUser = new User(idCounter, name, socket);
         socketUserMap.set(socket, newUser);
@@ -239,7 +250,7 @@ io.on('connection', function(socket){
         socket.emit("confirm updated", '');
 
         //Tell everybody who the new user's name is
-        io.emit("message", "New user's name is: " + name + ". Welcome!");
+        io.emit("message", "" + name + " has joined the game.");
 
         //update everybody (including new user) on new user's info
         io.emit("update new character", newUser.id, newUser.name, nC.x, nC.y, nC.z, nC.r, nC.velocity, nC.score);
@@ -260,22 +271,6 @@ io.on('connection', function(socket){
 server.listen(40378);
 console.log("Socket is listening!");
 
-
-function checkDeleteShockwaves() {
-  for (let [ks, a] of shockwaves) {
-    //ks is a shockwave list's key (ID)
-    //a is a list of shockwaves with the same ID
-    for (var i = 0; i < a.length; i++) {
-      //s = individual shockwave
-      var s = a[i];
-      if (s.checkDie()) {
-          s.kill();
-          a.splice(i, 1);
-          console.log(a.length);
-      }
-    }
-  }
-}
 
 
 
@@ -311,19 +306,28 @@ function gameSingleFrame() {
       s.move();
 
 
-
+      //dealing with collisions with characters, not yet implemented
       for (let [kc, c] of characters) {
         //kc = character's
         //c = individual character
         //s.collision(c);
       }
+
+
       io.emit("update shockwave", s.id, s.shockwaveID, s.x, s.y, s.angle, s.width, s.velocity, s.transparencyV);
 
+
+      //check whether to kill the current shockwave
+      if (s.checkDie()) {
+          s.killOnClient();
+          a.splice(i, 1);
+          i--;
+          console.log(a.length);
+      }
     }
 
   }
 
-  checkDeleteShockwaves();
 
 
 

@@ -6,12 +6,19 @@
         <style>
         #myCanvas {
           position: absolute;
-          left: 100px;
+          left: 55px;
           border:1px solid #505050;
         }
         #textBlock {
           position: absolute;
-          left:900px
+          left:1000px
+        }
+        #messages {
+          overflow:auto;
+          width:200px;
+          height:450px;
+        }
+        h1 {
         }
 
         </style>
@@ -23,10 +30,10 @@
 
     <body>
 
-        <h1>Shockwave.io connection test 2: group chat</h1>
+        <h1></h1>
 
 
-        <canvas id="myCanvas" width="750" height="450">
+        <canvas id="myCanvas" width="890" height="500">
           Your browser does not support the HTML5 canvas tag.
         </canvas>
 
@@ -36,14 +43,16 @@
 
 //https://stackoverflow.com/questions/5203407/how-to-detect-if-multiple-keys-are-pressed-at-once-using-javascript
 
-var canvasWidth = 750;
-var canvasHeight = 450;
+var canvasWidth = 890;
+var canvasHeight = 500;
 
 var keyMap = {};
 onkeydown = onkeyup = function(e){
     e = e || event;
     keyMap[e.keyCode] = e.type == 'keydown';
 }
+
+
 
 var holes = [];
 var characterDatas = new Map();
@@ -370,14 +379,18 @@ socket.on("kill shockwave", function(id, shockwaveID) {
 var givenName = false;
 function sendStuff() {
 
-    var x = document.forms["chat"].elements[0].value;
+    var x = document.getElementById("inputbox").value;
+    if (x == "") {
+      return;
+    }
     if (givenName) {
         socket.emit("message", x);
     } else {
         socket.emit("name", x);
-        document.getElementById("button").innerHTML = "Send message";
+        document.getElementById("button").innerHTML = "Enter Message";
         givenName = true;
     }
+    document.getElementById("inputbox").value = "";
 
 
 }
@@ -454,7 +467,7 @@ document.getElementById("myCanvas").addEventListener("click", requestShockwave, 
 
 
 
-document.addEventListener('keydown', function(event){
+document.addEventListener('keydown', function(event) {
 });
 
 function gameSingleFrame() {
@@ -481,14 +494,18 @@ document.getElementById("myCanvas").onmousemove = updateMouse;
 
 
         <div id="textBlock">
-        <form id='chat'>
-        <input type="text" name="inputText" value="" autocomplete="off"><br>
-        </form>
-        <button id="button" onClick=sendStuff()>Please input your name</button>
-        <div id="messages"></div>
-        <button id="stats" onClick=getStats()>Get stats</button>
-      </div>
+        <input id="inputbox" type="text" name="inputText" value="" autocomplete="off"><br>
 
+        <button id="button" onClick=sendStuff()>Input your name</button>
+        <div id="messages"></div>
+      </div>
+      <script>
+      document.getElementById("inputbox").addEventListener("keyup", function(event) {
+         if (event.keyCode == '13') {
+           sendStuff();
+         }
+      });
+      </script>
 
 
     </body>
