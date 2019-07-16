@@ -138,7 +138,9 @@ Shockwave.prototype.checkDie = function() {
   }
   return false;
 };
-
+Shockwave.prototype.kill = function() {
+  io.emit("kill shockwave", this.id, this.shockwaveID);
+};
 
 /**
 VICTORIA start
@@ -267,7 +269,7 @@ function checkDeleteShockwaves() {
       //s = individual shockwave
       var s = a[i];
       if (s.checkDie()) {
-          io.emit("kill shockwave", s.id, s.shockwaveID);
+          s.kill();
           a.splice(i, 1);
           console.log(a.length);
       }
