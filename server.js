@@ -109,7 +109,7 @@ function Shockwave (id, shockwaveID, x, y, angle, angleWidth, velocity, tV) {
     this.velocity = velocity;
     this.transparency = 255;
     this.transparencyV = tV;
-    this.width = 0;
+    this.width = 0; //WIDTH IS THE DIAMETER OF THE ARC, NOT THE RADIUS
     this.id = id;
     this.shockwaveID = shockwaveID;
 }
