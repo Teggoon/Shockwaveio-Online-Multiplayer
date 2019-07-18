@@ -32,6 +32,7 @@ var characters = new Map(); //map of each character
 var shockwaves = new Map(); //map of all the shockwaves
 var idCounter = 1; //counter for user's ID
 var shockwaveCounter = 1; //counter for shockwave's ID
+var holes = [];
 
 /**
 @param: first item's x position
@@ -57,8 +58,8 @@ function User (id, name, sock) {
     this.name = name;
     this.socket = sock;
     this.id = id;
-    var spawnLocationX = Math.random() * canvasWidth;
-    var spawnLocationY = Math.random() * canvasHeight;
+    var spawnLocationX = 0;
+    var spawnLocationY = 0;
 
     //make a new character for the user
     this.character = new Character(id, name, this, spawnLocationX, spawnLocationY);
@@ -155,19 +156,30 @@ Shockwave.prototype.killOnClient = function() {
 };
 
 /**
-VICTORIA start
+Function that sends all clients the info of the current shockwave
 */
+Shockwave.prototype.updateOnClient = function() {
+  //id, shockwaveID, x, y, angle, width, velocity, tV
+  io.emit("update shockwave", this.id, this.shockwaveID, this.x, this.y, this.angle, this.angleWidth, this.width, this.velocity, this.transparency, this.transparencyV);
+};
 
 
-/**
-VICTORIA end
-*/
+var Hole = function(x,y,size) {
+    this.x = x;
+    this.y = y;
+    this.size = size;
+};
+
 
 //JELAN temporary documentation of Hole (to be implemented):
 //this.x
 //this.y
 //this.size (the diameter)
 /**MAREHAN/JELAN start*/
+
+function splitShockwave(shockwave, hole) {
+
+}
 
 /**MAREHAN/JELAN end*/
 
@@ -215,6 +227,7 @@ io.on('connection', function(socket){
       if (shockwaves.get(id) == null) {
             shockwaves.set(id, []);
       }
+      //id, shockwaveID, x, y, angle, angleWidth, velocity, tV
       shockwaves.get(id).push(new Shockwave(id, shockwaveCounter, x, y, angle, angleWidth, velocity, tV));
       shockwaveCounter++;
 
@@ -231,6 +244,7 @@ io.on('connection', function(socket){
     //NEW USER
     socket.on('name', function(name) {
         console.log("new user's name is: " + name);
+        console.log("server holes length: " + holes.length);
         idCounter++;
         var newUser = new User(idCounter, name, socket);
         socketUserMap.set(socket, newUser);
@@ -257,7 +271,7 @@ io.on('connection', function(socket){
 
         //makes new user set myCharacter variable
         socket.emit("set user myCharacter", true);
-
+        sendUserHoles(socket);
 
         /**VICTORIA start*/
 
@@ -273,19 +287,29 @@ console.log("Socket is listening!");
 
 
 
+function initHoles() {
+  for (var i = 0; i < HOLE_NUM; i++){
+    var halfDist = MAP_SIZE/2;
+    var x = Math.random() * MAP_SIZE;
+    var y = Math.random() * MAP_SIZE;
+    var size = 50 + Math.random() * 100;
+    //holes.push(new Hole(x, y, size));
+  }
+  holes.push(new Hole(200,200, 150));
+};
+
+function sendUserHoles(socket) {
+  for (var i = 0; i < holes.length; i++) {
+    socket.emit("add hole", holes[i].x, holes[i].y, holes[i].size);
+  }
+}
+
 
 /**
 Everything in here runs every frame of the game
 */
 function gameSingleFrame() {
 
-  /**
-  VICTORIA start
-  */
-
-  /**
-  VICTORIA end
-  */
 
   for (let [k, c] of characters){
     //update all clients of all players
@@ -313,8 +337,8 @@ function gameSingleFrame() {
         //s.collision(c);
       }
 
-
-      io.emit("update shockwave", s.id, s.shockwaveID, s.x, s.y, s.angle, s.width, s.velocity, s.transparencyV);
+      //id, shockwaveID, x, y, angle, angleWidth, width, velocity, transparency, tV
+      s.updateOnClient();
 
 
       //check whether to kill the current shockwave
@@ -332,6 +356,13 @@ function gameSingleFrame() {
 
 
 }
+
+
+
+
+
+
+initHoles();
 
 //run above function once every 24 milliseconds
 setInterval(gameSingleFrame, 24);
