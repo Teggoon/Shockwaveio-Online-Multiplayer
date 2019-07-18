@@ -43,6 +43,8 @@
 
 //https://stackoverflow.com/questions/5203407/how-to-detect-if-multiple-keys-are-pressed-at-once-using-javascript
 
+const RESPAWN_TIMER = 40;
+
 var canvasWidth = 890;
 var canvasHeight = 500;
 
@@ -62,7 +64,10 @@ var myCharacter;
 var mouseX = 0;
 var mouseY = 0;
 var c = document.getElementById("myCanvas");
-
+var playerAlive = true;
+var thisWaitTimer = -1;
+var waitingForRespawning = false;
+var myName = "";
 
 //from https://nerdparadise.com/programming/javascriptmouseposition
 function updateMouse(mouseEvent) {
@@ -290,16 +295,6 @@ Hole.prototype.display = function(ctx) {
   ctx.restore();
 };
 
-/**
-VICTORIA start
-*/
-
-
-
-/**
-VICTORIA end
-*/
-
 
 
 /**
@@ -374,6 +369,10 @@ socket.on("delete user", function(id) {
   characterDatas.delete(id);
 });
 
+socket.on("your death", function(str) {
+  playerAlive = false;
+});
+
 socket.on("add hole", function(x,y,size) {
   holes.push(new Hole(x, y, size));
 });
@@ -399,9 +398,7 @@ socket.on("kill shockwave", function(id, shockwaveID) {
     shockwaves.get(id).delete(shockwaveID);
 });
 
-/**VICTORIA start*/
 
-/**VICTORIA end*/
 
 var givenName = false;
 function sendStuff() {
@@ -410,6 +407,7 @@ function sendStuff() {
     if (x == "") {
       return;
     }
+    myName = x;
     if (givenName) {
         socket.emit("message", x);
     } else {
@@ -429,6 +427,7 @@ function sendStuff() {
 //should be updated == TRUE, temporarily this
 function drawCanvas () {
       var ctx = c.getContext("2d");
+
       ctx.beginPath();
       ctx.rect(0, 0, canvasWidth, canvasHeight);
       ctx.fillStyle = "white";
@@ -436,47 +435,56 @@ function drawCanvas () {
 
       ctx.font = "30px Arial";
 
-      ctx.save();
-      ctx.translate(canvasWidth/2 - myCharacter.x, canvasHeight/2 - myCharacter.y);
+      if (playerAlive && myCharacter != null) {
+        ctx.save();
+        ctx.translate(canvasWidth/2 - myCharacter.x, canvasHeight/2 - myCharacter.y);
 
 
-      for (var i = 0; i < holes.length; i++) {
-        holes[i].display(ctx);
-      }
-
-
-      //ctx.fillText("Hello I'm a test canvas", 10, 50);
-      for (let [k, c] of characterDatas) {
-        if (k != myID) {
-          c.display(ctx, c.x, c.y);
+        for (var i = 0; i < holes.length; i++) {
+          holes[i].display(ctx);
         }
-      }
-      ctx.restore();
-
-      ctx.save();
-      myCharacter.display(ctx, canvasWidth / 2, canvasHeight / 2);
-      ctx.restore();
 
 
-      ctx.save();
-      ctx.translate(canvasWidth/2 - myCharacter.x, canvasHeight/2 - myCharacter.y);
-      //display all shockwaves
-      for (let [k, v] of shockwaves){
-          ctx.save();
-          for (let [ks, s] of v){
-            s.display(ctx);
+        //ctx.fillText("Hello I'm a test canvas", 10, 50);
+        for (let [k, c] of characterDatas) {
+          if (k != myID) {
+            c.display(ctx, c.x, c.y);
           }
+        }
+        ctx.restore();
+
+          ctx.save();
+          myCharacter.display(ctx, canvasWidth / 2, canvasHeight / 2);
           ctx.restore();
+
+
+        ctx.save();
+        ctx.translate(canvasWidth/2 - myCharacter.x, canvasHeight/2 - myCharacter.y);
+        //display all shockwaves
+        for (let [k, v] of shockwaves){
+            ctx.save();
+            for (let [ks, s] of v){
+              s.display(ctx);
+            }
+            ctx.restore();
+        }
+        ctx.restore();
       }
-      ctx.restore();
 
-      /**VICTORIA start*/
 
-      /**VICTORIA end*/
 
       ctx.font = "20px Arial";
 
-      ctx.strokeText("holes length:"+holes.length, 30,30);
+      ctx.strokeText("respawn timer:"+thisWaitTimer, 30,30);
+
+
+      ctx.strokeText("Player alive: " + playerAlive, 30,60);
+
+      ctx.strokeText("Waiting to respawn: " + waitingForRespawning, 30,90);
+
+      if (!playerAlive){
+              ctx.strokeText("You're dead! Click to respawn", canvasWidth / 2, canvasHeight / 2);
+      }
 
 }
 
@@ -484,6 +492,7 @@ function incrementScore(){
     characterDatas.get(myID).score += 3;
     socket.emit("update stats", myID, myCharacter.score, myCharacter.life);
 }
+
 
 function requestShockwave() {
     if (myCharacter.reload > 1 && myCharacter.onGround){
@@ -496,7 +505,23 @@ function requestShockwave() {
 
 }
 
-document.getElementById("myCanvas").addEventListener("click", requestShockwave, false);
+function deathHandler () {
+  this.thisWaitTimer = RESPAWN_TIMER;
+  waitingForRespawning = true;
+  characterDatas.clear();
+  shockwaves.clear();
+  holes.length = 0;
+}
+
+function clickHandler () {
+  if (playerAlive){
+    requestShockwave();
+  } else {
+    deathHandler();
+  }
+}
+
+document.getElementById("myCanvas").addEventListener("click", clickHandler, false);
 
 
 
@@ -505,9 +530,21 @@ document.addEventListener('keydown', function(event) {
 
 function gameSingleFrame() {
     drawCanvas();
-    if (characterDatas.get(myID) != null) {
+    if (playerAlive && characterDatas.get(myID) != null) {
       characterDatas.get(myID).movement();
     }
+
+    if (waitingForRespawning) {
+      thisWaitTimer--;
+    }
+
+    if (thisWaitTimer <= 0 && waitingForRespawning) {
+    waitingForRespawning = false;
+    playerAlive = true;
+    thisWaitTimer = -1;
+      socket.emit("name", myName);
+    }
+
 
 }
 

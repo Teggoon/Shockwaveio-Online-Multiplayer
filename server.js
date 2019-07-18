@@ -6,10 +6,11 @@ var fs = require('fs');
 //KEVIN
 const MAP_SIZE = 2000;
 const HOLE_NUM = 30;
-
+const RESPAWN_TIMER = 200;
 
 var canvasWidth = 890;
 var canvasHeight = 500;
+
 
 /*
 * https://openclassrooms.com/en/courses/2504541-ultra-fast-applications-using-node-js/2505653-socket-io-let-s-go-to-real-time
@@ -41,7 +42,7 @@ var holes = [];
 @param: second item's y position
 @return the distance between them on the Cartesian plane
 */
-//JELAN, KEVIN
+//JELAN, KEVIN, VICTORIA
 function dist(x1, y1, x2, y2) {
   return Math.sqrt(Math.sq(x2 - x1) + Math.sq(y2 - y1));
 }
@@ -78,11 +79,12 @@ Constructor:
 @param: initial x position
 @param: initial y position
 */
+//VICTORIA
 function Character (id, name, user, x, y) {
     this.id = id;
     this.user = user;
     this.x = x;
-    this.y = y;
+    this.y = y; //position in the air, 0 means on the ground
     this.z = 0;
     this.r = 0;
     this.score = 0;
@@ -163,12 +165,19 @@ Shockwave.prototype.updateOnClient = function() {
   io.emit("update shockwave", this.id, this.shockwaveID, this.x, this.y, this.angle, this.angleWidth, this.radius, this.velocity, this.transparency, this.transparencyV);
 };
 
-//JELAN
+//JELAN, VICTORIA
 var Hole = function(x,y,size) {
     this.x = x;
     this.y = y;
     this.size = size;
 };
+Hole.prototype.collideWithUser = function (character) {
+/**VICTORIA start*/
+
+/**VICTORIA end*/
+  return false;
+};
+
 
 
 /**MAREHAN/JELAN start*/
@@ -186,6 +195,12 @@ function shockwaveHoleCollide(shockwave, hole) {
 }
 
 /**MAREHAN/JELAN end*/
+
+
+
+
+
+
 
 // Loading socket.io
 var io = require('socket.io').listen(server);
@@ -205,6 +220,7 @@ io.on('connection', function(socket){
       var userIndex = -1;
 
       characters.delete(userId);
+      socketUserMap.delete(socket);
     }
 
     io.emit("delete user", userId);
@@ -277,11 +293,9 @@ io.on('connection', function(socket){
         socket.emit("set user myCharacter", true);
         sendUserHoles(socket);
 
-        /**VICTORIA start*/
-
-        /**VICTORIA end*/
         console.log(characters.size);
     });
+
 });
 
 
@@ -308,6 +322,18 @@ function sendUserHoles(socket) {
   }
 }
 
+/**
+Function that takes in a character as a parameter
+And removes this character from everywhere in the game (server + all clients)
+*/
+//VICTORIA
+function sendDeathToClient (character) {
+  console.log("sent user his/her death");
+  character.user.socket.emit("your death", "");
+  io.emit("delete user", character.id);
+  characters.delete(character.id);
+};
+
 
 /**
 Everything in here runs every frame of the game
@@ -319,6 +345,9 @@ function gameSingleFrame() {
     //update all clients of all players
     io.emit("update stats", c.id, c.score, c.life);
     io.emit("update position", c.id, c.x, c.y, c.z, c.r, c.velocity);
+
+
+
   }
 
 
