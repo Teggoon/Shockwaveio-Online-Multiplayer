@@ -243,17 +243,18 @@ CharacterData.prototype.moveRight = function() {
 }
 
 
+//JELAN
 //id, shockwaveID, x, y, angle, angleWidth, velocity, transparency, tV
 function Shockwave (id, shockwaveID, x, y, angle, angleWidth, velocity, transparency, tV) {
     this.angle = angle;
-    this.width = 0;
+    //this.width = 0;
     this.angleWidth = 30;
     this.x=x;
     this.y=y;
     this.velocity = velocity;
     this.transparency = transparency;
     this.transparencyV = tV;
-    this.width = 0;
+    this.radius = 0;
     this.id = id;
     this.shockwaveID = shockwaveID;
 }
@@ -262,18 +263,18 @@ Shockwave.prototype.display = function(ctx) {
   ctx.beginPath();
   ctx.translate(this.x, this.y);
   ctx.rotate(this.angle - this.angleWidth / 2);
-  ctx.arc(0,0, this.width, 0, this.angleWidth / 180 * Math.PI);
+  ctx.arc(0,0, this.radius, 0, this.angleWidth / 180 * Math.PI);
   ctx.stroke();
   ctx.restore();
 }
-Shockwave.prototype.acceptPositionUpdate = function(angle, angleWidth, width, transparency){
-  this.width = width;
+Shockwave.prototype.acceptPositionUpdate = function(angle, angleWidth, radius, transparency){
+  this.radius = radius;
   this.angle = angle;
   this.angleWidth = angleWidth;
   this.transparency = transparency;
 }
 
-
+//JELAN
 var Hole = function (x, y, size) {
     this.x = x;
     this.y = x;
@@ -288,6 +289,7 @@ Hole.prototype.display = function(ctx) {
   ctx.fill();
   ctx.restore();
 };
+
 /**
 VICTORIA start
 */
@@ -377,10 +379,10 @@ socket.on("add hole", function(x,y,size) {
 });
 
 //s.id, s.x, s.y, s.angle, s.width, s.velocity, s.transparencyV
-socket.on("update shockwave", function(id, shockwaveID, x, y, angle, angleWidth, width, velocity, transparency, tV){
+socket.on("update shockwave", function(id, shockwaveID, x, y, angle, angleWidth, radius, velocity, transparency, tV){
   var s = shockwaves.get(id);
   if (s == null) {
-    //function Shockwave (id, x, y, angle, width, velocity, tV) {
+    //function Shockwave (id, x, y, angle, radius, velocity, tV) {
     shockwaves.set(id, new Map());
   }
   s = shockwaves.get(id);
@@ -389,7 +391,7 @@ socket.on("update shockwave", function(id, shockwaveID, x, y, angle, angleWidth,
   }
 
   var currentShockwave = s.get(shockwaveID);
-  currentShockwave.acceptPositionUpdate(angle, angleWidth, width, transparency);
+  currentShockwave.acceptPositionUpdate(angle, angleWidth, radius, transparency);
 
 });
 

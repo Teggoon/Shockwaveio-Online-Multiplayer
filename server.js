@@ -28,7 +28,7 @@ var server = http.createServer(function(req, res) {
 var socketUserMap = new Map();
 
 var characters = new Map(); //map of each character
-//JELAN
+
 var shockwaves = new Map(); //map of all the shockwaves
 var idCounter = 1; //counter for user's ID
 var shockwaveCounter = 1; //counter for shockwave's ID
@@ -104,19 +104,19 @@ Character.prototype.acceptPositionUpdate = function(x, y, z, r) {
 //JELAN, KEVIN
 function Shockwave (id, shockwaveID, x, y, angle, angleWidth, velocity, tV) {
     this.angle = angle;
-    this.angleWidth = angleWidth;
+    this.angleWidth = angleWidth; //sweep of the arc
     this.x=x;
     this.y=y;
     this.velocity = velocity;
     this.transparency = 255;
     this.transparencyV = tV;
-    this.width = 0; //WIDTH IS THE DIAMETER OF THE ARC, NOT THE RADIUS
+    this.radius = 0; //WIDTH IS THE DIAMETER OF THE ARC, NOT THE RADIUS
     this.id = id;
     this.shockwaveID = shockwaveID;
 }
 Shockwave.prototype.move = function () {
     this.transparency -= this.transparencyV;
-    this.width += this.velocity;
+    this.radius += this.velocity;
 };
 
 Shockwave.prototype.collision = function (p) {
@@ -126,7 +126,7 @@ Shockwave.prototype.collision = function (p) {
 
     var angleToP = Math.atan2(p.y - this.y,p.x - this.x);
     var angleDifference = (angleToP - this.angle);
-    if (p.z <= 0 && Math.abs(angleDifference) <= this.width/2 &&
+    if (p.z <= 0 && Math.abs(angleDifference) <= this.radius/2 &&
     Math.abs(dist(this.x,this.y,p.x,p.y) - (this.xWidth/2 + 5)) < 10){
         p.vx = cos(this.angle) * 3;
         p.vy = sin(this.angle) * 3;
@@ -159,11 +159,11 @@ Shockwave.prototype.killOnClient = function() {
 Function that sends all clients the info of the current shockwave
 */
 Shockwave.prototype.updateOnClient = function() {
-  //id, shockwaveID, x, y, angle, width, velocity, tV
-  io.emit("update shockwave", this.id, this.shockwaveID, this.x, this.y, this.angle, this.angleWidth, this.width, this.velocity, this.transparency, this.transparencyV);
+  //id, shockwaveID, x, y, angle, radius, velocity, tV
+  io.emit("update shockwave", this.id, this.shockwaveID, this.x, this.y, this.angle, this.angleWidth, this.radius, this.velocity, this.transparency, this.transparencyV);
 };
 
-
+//JELAN
 var Hole = function(x,y,size) {
     this.x = x;
     this.y = y;
@@ -171,13 +171,17 @@ var Hole = function(x,y,size) {
 };
 
 
-//JELAN temporary documentation of Hole (to be implemented):
-//this.x
-//this.y
-//this.size (the diameter)
 /**MAREHAN/JELAN start*/
 
-function splitShockwave(shockwave, hole) {
+function shockwaveHoleCollide(shockwave, hole) {
+
+//4 properties of the shockwave object can be modified in here would
+//reflect on client end immediately:
+//shockwave.radius
+//shockwave.angleWidth
+//shockwave.angle
+//shockwave.transparency
+
 
 }
 
@@ -328,7 +332,9 @@ function gameSingleFrame() {
       //s = individual shockwave
       var s = a[i];
       s.move();
-
+      for (var j = 0; j < holes.length; j++) {
+        shockwaveHoleCollide(s, holes[i]);
+      }
 
       //dealing with collisions with characters, not yet implemented
       for (let [kc, c] of characters) {
@@ -337,7 +343,6 @@ function gameSingleFrame() {
         //s.collision(c);
       }
 
-      //id, shockwaveID, x, y, angle, angleWidth, width, velocity, transparency, tV
       s.updateOnClient();
 
 
