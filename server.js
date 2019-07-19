@@ -271,7 +271,7 @@ io.on('connection', function(socket){
         characters.set(idCounter, newUser.character);
 
 
-        socket.emit("init synchronization", idCounter);
+        socket.emit("init synchronization", idCounter, MAP_SIZE);
 
         //update new user with info on the room's all players
         for (let [k, c] of characters) {

@@ -47,6 +47,7 @@ const RESPAWN_TIMER = 40;
 
 var canvasWidth = 890;
 var canvasHeight = 500;
+var MAP_SIZE;
 
 var keyMap = {};
 onkeydown = onkeyup = function(e){
@@ -309,8 +310,9 @@ socket.on('message', function(message) {
 });
 
 
-socket.on('init synchronization',function(id) {
+socket.on('init synchronization',function(id, map_size) {
   myID = id;
+  MAP_SIZE = map_size;
 });
 
 socket.on('set user myCharacter', function(bool) {
@@ -438,6 +440,11 @@ function drawCanvas () {
       if (playerAlive && myCharacter != null) {
         ctx.save();
         ctx.translate(canvasWidth/2 - myCharacter.x, canvasHeight/2 - myCharacter.y);
+
+
+        ctx.rect(-MAP_SIZE / 2, -MAP_SIZE / 2, MAP_SIZE, MAP_SIZE);
+        ctx.strokeStyle = "black";
+        ctx.stroke();
 
 
         for (var i = 0; i < holes.length; i++) {
