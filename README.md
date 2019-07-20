@@ -4,12 +4,19 @@ A collaboration between 8 students. A multiplayer game hosted on A2Hosting, code
 
 The game uses the Socket.io library for TCP sockets. A HTML5 canvas was used, and Node.js handles backend.
 
+Each player controls a bot that sends shockwaves on the ground to hit other players. Each player can move about, jump to dodge shockwaves, and plant walls to block attacks.
+Other features:
+Holes in the ground one can fall into
+Melee combat (jumping on other people)
+Shop to upgrade and customize your weapons (phase 2)
+
+
 Team members:
-Daniel
-Kevin
-Marehan
-Elina
-Noah
-Victoria
-Richard
-Elise
+Haocheng Li
+Kevin Zhang
+Jelan Waly
+Elina Shankar
+Noah Todd
+Victoria Edeeva
+Richard To
+Elise Kim
