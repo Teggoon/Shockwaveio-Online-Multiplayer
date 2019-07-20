@@ -11,12 +11,13 @@
         }
         #textBlock {
           position: absolute;
-          left:1000px
+          left: 45%;
+          top: 50%;
         }
         #messages {
           overflow:auto;
           width:200px;
-          height:450px;
+          height:60px;
         }
         h1 {
         }
@@ -33,7 +34,7 @@
         <h1></h1>
 
 
-        <canvas id="myCanvas" width="890" height="500">
+        <canvas id="myCanvas" width="1140" height="500">
           Your browser does not support the HTML5 canvas tag.
         </canvas>
 
@@ -45,7 +46,7 @@
 
 const RESPAWN_TIMER = 40;
 
-var canvasWidth = 890;
+var canvasWidth = 1140;
 var canvasHeight = 500;
 var MAP_SIZE;
 
@@ -416,6 +417,8 @@ function sendStuff() {
         socket.emit("name", x);
         document.getElementById("button").innerHTML = "Enter Message";
         givenName = true;
+        document.getElementById("textBlock").style.left = "74px";
+        document.getElementById("textBlock").style.top = "70%";
     }
     document.getElementById("inputbox").value = "";
 
@@ -575,7 +578,7 @@ document.getElementById("myCanvas").onmousemove = updateMouse;
 
         <button id="button" onClick=sendStuff()>Input your name</button>
         <div id="messages"></div>
-      </div>
+        </div>
       <script>
       document.getElementById("inputbox").addEventListener("keyup", function(event) {
          if (event.keyCode == '13') {

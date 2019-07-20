@@ -8,7 +8,7 @@ const MAP_SIZE = 2000;
 const HOLE_NUM = 30;
 const RESPAWN_TIMER = 200;
 
-var canvasWidth = 890;
+var canvasWidth = 1140;
 var canvasHeight = 500;
 
 
