@@ -11,13 +11,14 @@
         }
         #textBlock {
           position: absolute;
-          left: 45%;
+          left: 40%;
           top: 50%;
         }
         #messages {
           overflow:auto;
+          margin-top: 8px;
           width:200px;
-          height:60px;
+          height:70px;
         }
         h1 {
         }
@@ -304,10 +305,15 @@ Hole.prototype.display = function(ctx) {
 */
 
 var updated = false;
+var numOfMessages = 0;
+
 
 var socket = io.connect('localhost:40378');
 socket.on('message', function(message) {
-    document.getElementById("messages").innerHTML += message +"<br/>";
+  var messagesElem = document.getElementById("messages");
+    messagesElem.innerHTML += message +"<br/>";
+    numOfMessages++;
+    messagesElem.scrollTop = messagesElem.scrollHeight;
 });
 
 
@@ -415,8 +421,9 @@ function sendStuff() {
         socket.emit("message", x);
     } else {
         socket.emit("name", x);
-        document.getElementById("button").innerHTML = "Enter Message";
+        //document.getElementById("button").innerHTML = "Enter Message";
         givenName = true;
+        document.getElementById("button").style.visibility = "hidden";
         document.getElementById("textBlock").style.left = "74px";
         document.getElementById("textBlock").style.top = "70%";
     }
@@ -574,7 +581,7 @@ document.getElementById("myCanvas").onmousemove = updateMouse;
 
 
         <div id="textBlock">
-        <input id="inputbox" type="text" name="inputText" value="" autocomplete="off"><br>
+        <input onfocus="if (this.value == 'Enter message'){this.value='';}" onblur="if (this.value == ''){this.value='Enter message';}" id="inputbox" type="text" name="inputText" value="" autocomplete="off">
 
         <button id="button" onClick=sendStuff()>Input your name</button>
         <div id="messages"></div>
