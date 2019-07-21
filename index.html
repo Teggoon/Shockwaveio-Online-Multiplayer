@@ -120,7 +120,7 @@ function CharacterData(id, name, x, y, z, r, score, velocity) {
   this.onGround = true;
   this.life = 100;
   this.reload = 0;
-  this.reloadSpeed = 0.1;
+  this.reloadSpeed = 0.05;
   this.angleWidth = 80;
 }
 
@@ -148,7 +148,7 @@ CharacterData.prototype.display = function(ctx, x, y) {
   ctx.stroke();
   ctx.restore();
   ctx.font = "20px Arial";
-  ctx.strokeText(this.name, - 20, - 34);
+  ctx.strokeText(this.name + ":" + this.life, - 20, - 34);
   ctx.restore();
 };
 

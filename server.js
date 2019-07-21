@@ -45,7 +45,7 @@ var holes = [];
 */
 //JELAN, KEVIN, VICTORIA
 function dist(x1, y1, x2, y2) {
-  return Math.sqrt(Math.sq(x2 - x1) + Math.sq(y2 - y1));
+  return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
 }
 
 
@@ -101,13 +101,24 @@ Character.prototype.acceptPositionUpdate = function(x, y, z, r) {
   this.z = z;
   this.r = r;
 }
+
+Character.prototype.checkDie = function() {
+  if (this.life <= 0) {
+    sendDeathToClient(this);
+  }
+};
+
 Character.prototype.sendPositionUpdate = function() {
   io.emit("update position", this.id, this.x, this.y, this.z, this.r, this.velocity);
 };
+
 Character.prototype.sendPositionUpdateOVERRIDE = function() {
   io.emit("OVERRIDE position", this.id, this.x, this.y, this.z, this.r, this.velocity);
 };
 
+Character.prototype.sendStatusUpdate = function() {
+  io.emit("update stats", this.id, this.score, this.life);
+};
 
 
 //JELAN, KEVIN
@@ -119,7 +130,7 @@ function Shockwave (id, shockwaveID, x, y, angle, angleWidth, velocity, tV) {
     this.velocity = velocity;
     this.transparency = 255;
     this.transparencyV = tV;
-    this.radius = 0; //WIDTH IS THE DIAMETER OF THE ARC, NOT THE RADIUS
+    this.radius = 0;
     this.id = id;
     this.shockwaveID = shockwaveID;
 }
@@ -135,11 +146,12 @@ Shockwave.prototype.collision = function (p) {
 
     var angleToP = Math.atan2(p.y - this.y,p.x - this.x);
     var angleDifference = (angleToP - this.angle);
-    if (p.z <= 0 && Math.abs(angleDifference) <= this.radius/2 &&
-    Math.abs(dist(this.x,this.y,p.x,p.y) - (this.xWidth/2 + 5)) < 10){
-        p.vx = cos(this.angle) * 3;
-        p.vy = sin(this.angle) * 3;
-        p.life -= 5;
+    if (p.z <= 0 && Math.abs(angleDifference) <= this.radius &&
+    Math.abs(dist(this.x,this.y,p.x,p.y) - (this.radius + 5)) < 10){
+        p.vx = Math.cos(this.angle) * 3;
+        p.vy = Math.sin(this.angle) * 3;
+        p.life -= 15;
+        p.sendStatusUpdate();
     }
 
 };
@@ -374,6 +386,7 @@ function gameSingleFrame() {
     io.emit("update stats", c.id, c.score, c.life);
     c.sendPositionUpdate();
     containCharacterInMap(c);
+    c.checkDie();
 
   }
 
@@ -396,7 +409,7 @@ function gameSingleFrame() {
       for (let [kc, c] of characters) {
         //kc = character's
         //c = individual character
-        //s.collision(c);
+        s.collision(c);
       }
 
       s.updateOnClient();
