@@ -368,6 +368,15 @@ socket.on('update position', function(id, x, y, z, r, vel) {
   }
 });
 
+socket.on('OVERRIDE position', function(id, x, y, z, r, vel) {
+
+  var currentCharacter = characterDatas.get(id);
+  if (currentCharacter != null)
+  {
+    currentCharacter.acceptPositionUpdate(x, y, z, r, vel);
+  }
+});
+
 socket.on("confirm updated", function(str) {
   updated = true;
 });
@@ -491,13 +500,6 @@ function drawCanvas () {
 
 
       ctx.font = "20px Arial";
-
-      ctx.strokeText("respawn timer:"+thisWaitTimer, 30,30);
-
-
-      ctx.strokeText("Player alive: " + playerAlive, 30,60);
-
-      ctx.strokeText("Waiting to respawn: " + waitingForRespawning, 30,90);
 
       if (!playerAlive){
               ctx.strokeText("You're dead! Click to respawn", canvasWidth / 2, canvasHeight / 2);

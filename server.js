@@ -7,6 +7,7 @@ var fs = require('fs');
 const MAP_SIZE = 2000;
 const HOLE_NUM = 30;
 const RESPAWN_TIMER = 200;
+const PLAYER_ROUGH_RADIUS = 14;
 
 var canvasWidth = 1140;
 var canvasHeight = 500;
@@ -100,6 +101,12 @@ Character.prototype.acceptPositionUpdate = function(x, y, z, r) {
   this.z = z;
   this.r = r;
 }
+Character.prototype.sendPositionUpdate = function() {
+  io.emit("update position", this.id, this.x, this.y, this.z, this.r, this.velocity);
+};
+Character.prototype.sendPositionUpdateOVERRIDE = function() {
+  io.emit("OVERRIDE position", this.id, this.x, this.y, this.z, this.r, this.velocity);
+};
 
 
 
@@ -335,6 +342,27 @@ function sendDeathToClient (character) {
 };
 
 
+function containCharacterInMap(c) {
+      if (c.x - PLAYER_ROUGH_RADIUS < -MAP_SIZE / 2) {
+        c.x = -MAP_SIZE / 2 + PLAYER_ROUGH_RADIUS;
+        c.vx = 0;
+        c.sendPositionUpdateOVERRIDE();
+      } else if (c.x + PLAYER_ROUGH_RADIUS >  MAP_SIZE / 2) {
+        c.x =  MAP_SIZE / 2 - PLAYER_ROUGH_RADIUS;
+        c.vx = 0;
+        c.sendPositionUpdateOVERRIDE();
+      }
+      if (c.y + PLAYER_ROUGH_RADIUS >  MAP_SIZE / 2) {
+        c.y =  MAP_SIZE / 2 - PLAYER_ROUGH_RADIUS;
+        c.vy = 0;
+        c.sendPositionUpdateOVERRIDE();
+      } else if (c.y - PLAYER_ROUGH_RADIUS  < -MAP_SIZE / 2) {
+        c.y =  -MAP_SIZE / 2 + PLAYER_ROUGH_RADIUS;
+        c.vy = 0;
+        c.sendPositionUpdateOVERRIDE();
+      }
+}
+
 /**
 Everything in here runs every frame of the game
 */
@@ -344,9 +372,8 @@ function gameSingleFrame() {
   for (let [k, c] of characters){
     //update all clients of all players
     io.emit("update stats", c.id, c.score, c.life);
-    io.emit("update position", c.id, c.x, c.y, c.z, c.r, c.velocity);
-
-
+    c.sendPositionUpdate();
+    containCharacterInMap(c);
 
   }
 
