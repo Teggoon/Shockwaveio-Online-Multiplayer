@@ -192,7 +192,9 @@ var Hole = function(x,y,size) {
 };
 Hole.prototype.collideWithUser = function (character) {
 /**VICTORIA start*/
-
+    if ( (dist(this.x, this.y, charachter.x, character.y) <= this.size/2) && character.z <= 0){
+    sendDeathToClient(character);
+        return true;}
 /**VICTORIA end*/
   return false;
 };

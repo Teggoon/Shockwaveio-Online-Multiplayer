@@ -16,7 +16,6 @@ Haocheng Li
 Kevin Zhang
 Jelan Waly
 Elina Shankar
-Noah Todd
 Victoria Edeeva
 Richard To
 Elise Kim
