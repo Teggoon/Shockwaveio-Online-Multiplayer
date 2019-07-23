@@ -124,7 +124,7 @@ Character.prototype.sendStatusUpdate = function() {
 //JELAN, KEVIN
 function Shockwave (id, shockwaveID, x, y, angle, angleWidth, velocity, tV) {
     this.angle = angle;
-    this.angleWidth = angleWidth; //sweep of the arc
+    this.angleWidth = angleWidth / 180 * Math.PI; //sweep of the arc
     this.x=x;
     this.y=y;
     this.velocity = velocity;
@@ -144,10 +144,13 @@ Shockwave.prototype.collision = function (p) {
         return;
     }
 
-    var angleToP = Math.atan2(p.y - this.y,p.x - this.x);
+    var angleToP = Math.atan2(p.y - this.y, p.x - this.x);
     var angleDifference = (angleToP - this.angle);
-    if (p.z <= 0 && Math.abs(angleDifference) <= this.radius &&
-    Math.abs(dist(this.x,this.y,p.x,p.y) - (this.radius + 5)) < 10){
+    console.log("angle to p: " + angleToP);
+    console.log("my angle: " + this.angle);
+    console.log("shockwave angle width: "+ this.angleWidth);
+    if (p.z <= 0 && Math.abs(angleDifference) <= this.angleWidth / 2 &&
+      Math.abs(dist(this.x,this.y,p.x,p.y) - (this.radius + 5)) < 10) {
         p.vx = Math.cos(this.angle) * 3;
         p.vy = Math.sin(this.angle) * 3;
         p.life -= 15;
@@ -391,7 +394,6 @@ function gameSingleFrame() {
     c.sendPositionUpdate();
     containCharacterInMap(c);
     c.checkDie();
-
 
     for (var i = 0; i < holes.length; i ++) {
       holes[i].collideWithUser(c);

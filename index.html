@@ -120,7 +120,7 @@ function CharacterData(id, name, x, y, z, r, score, velocity) {
   this.onGround = true;
   this.life = 100;
   this.reload = 0;
-  this.reloadSpeed = 0.1;
+  this.reloadSpeed = 0.05;
   this.angleWidth = 80;
 }
 
@@ -148,7 +148,7 @@ CharacterData.prototype.display = function(ctx, x, y) {
   ctx.stroke();
   ctx.restore();
   ctx.font = "20px Arial";
-  ctx.strokeText(this.name, - 20, - 34);
+  ctx.strokeText(this.name + ":" + this.life, - 20, - 34);
   ctx.restore();
 };
 
@@ -270,8 +270,8 @@ Shockwave.prototype.display = function(ctx) {
   ctx.save();
   ctx.beginPath();
   ctx.translate(this.x, this.y);
-  ctx.rotate(this.angle - this.angleWidth / 2);
-  ctx.arc(0,0, this.radius, 0, this.angleWidth / 180 * Math.PI);
+  ctx.rotate(this.angle);
+  ctx.arc(0,0, this.radius, -this.angleWidth/2, this.angleWidth/2);
   ctx.stroke();
   ctx.restore();
 }
@@ -517,7 +517,7 @@ function requestShockwave() {
     if (myCharacter.reload > 1 && myCharacter.onGround){
       myCharacter.reload = 0;
       //id, x, y, angle, angleWidth, velocity, tV
-      socket.emit("add shockwave", myID, myCharacter.x, myCharacter.y, myCharacter.r + 2.21, myCharacter.angleWidth, 10, 5);
+      socket.emit("add shockwave", myID, myCharacter.x, myCharacter.y, myCharacter.r, myCharacter.angleWidth, 10, 5);
 
       //shockwaves.set(myID, new Shockwave());
     }
