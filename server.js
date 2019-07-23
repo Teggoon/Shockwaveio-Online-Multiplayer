@@ -146,9 +146,6 @@ Shockwave.prototype.collision = function (p) {
 
     var angleToP = Math.atan2(p.y - this.y, p.x - this.x);
     var angleDifference = (angleToP - this.angle);
-    console.log("angle to p: " + angleToP);
-    console.log("my angle: " + this.angle);
-    console.log("shockwave angle width: "+ this.angleWidth);
     if (p.z <= 0 && Math.abs(angleDifference) <= this.angleWidth / 2 &&
       Math.abs(dist(this.x,this.y,p.x,p.y) - (this.radius + 5)) < 10) {
         p.vx = Math.cos(this.angle) * 3;
