@@ -192,7 +192,7 @@ var Hole = function(x,y,size) {
 };
 Hole.prototype.collideWithUser = function (character) {
 /**VICTORIA start*/
-    if ( (dist(this.x, this.y, charachter.x, character.y) <= this.size/2) && character.z <= 0){
+    if ( (dist(this.x, this.y, character.x, character.y) <= this.size) && character.z <= 0){
     sendDeathToClient(character);
         return true;}
 /**VICTORIA end*/
@@ -277,7 +277,9 @@ io.on('connection', function(socket){
 
     socket.on("update position", function(id, x, y, z, r) {
       var currentCharacter = characters.get(id);
-      currentCharacter.acceptPositionUpdate(x,y,z,r);
+      if (currentCharacter != null) {
+        currentCharacter.acceptPositionUpdate(x,y,z,r);
+      }
     });
 
 
@@ -389,6 +391,10 @@ function gameSingleFrame() {
     c.sendPositionUpdate();
     containCharacterInMap(c);
     c.checkDie();
+
+    for (var i = 0; i < holes.length; i ++) {
+      holes[i].collideWithUser(c);
+    }
 
   }
 
