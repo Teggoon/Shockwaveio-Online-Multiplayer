@@ -206,6 +206,33 @@ Hole.prototype.collideWithUser = function (character) {
 
 /**MAREHAN/JELAN start*/
 
+function checkCirclesIntersect( x1, y1, r1, x2, y2, r2){
+	if (r1 + r2 == dist( x1, y1, x2, y2 )){
+		// circles are tangent to each other and intersect at one point
+		return 0;
+	}
+	else if ( r1 + r2 > dist (x1, y1, x2, y2 )){
+		//circles intersect at two points
+		return 1;
+	}
+	return -1; // circles dont intersect
+}
+function checkPointOnArc(x,y,shockwave){
+	//determine if the point lies within the arc using center
+	// of shockwave as the "origin" and angle of point
+	cartesianX =  x - shockwave.x;
+	cartesianY = y - shockwave.y;
+	anglePoint = 180*Math.atan(cartesianY, cartesianX)/Math.PI;//convert to degree 
+	// find end angle of arc in radiands using s = r0
+	endAngle = (shockwave.radius * (shockwave.angle*Math.PI)/180 + shockwave.width) / shockwave.radius;
+	endAngle = 180*endAngle/Math.PI; // convert to degrees
+	if ( anglePoint >= shockwave.angle && anglePoint <= endAngle){
+	return true;
+	}
+	else {
+	return false;
+	}
+}
 function shockwaveHoleCollide(shockwave, hole) {
 
 //4 properties of the shockwave object can be modified in here would
@@ -214,9 +241,52 @@ function shockwaveHoleCollide(shockwave, hole) {
 //shockwave.angleWidth
 //shockwave.angle
 //shockwave.transparency
+// see https://stackoverflow.com/questions/3349125/circle-circle-intersection-points
+	//check if circle with hole  and circle containing shockwave intersect
+	intersecting =  (checkCirclesIntersect(hole.x, hole.y, hole.size/2, 
+		shockwave.x, shockwave.y, shockwave.radius));
+	// shockwave doesnt touch hole
+	if ( intersecting == -1 ){
+	// if the circles dont intersect, then neither will arc
+	}
+	//shockwave circle  touches hole
+	else if ( intersecting == 0 ){
+		// if circles are tanget then point of intersection is 
+		// midway between center of arc and center is point of 
+		// intersection so check if its part of shockwave
+		midX = (hole.x + shockwave.x)/2;
+		midY = (hole.y + shockwave.y)/2;
+		if (checkPointOnArc (midX, midY) == true ){
+			shockwave.killOnClient();
+		}
+	}
+	//shockwave circle overlaps with hole	
+	else if (intersecting == 1 ) {
+		//points of intersection of overlapping circles given by 
+		//x = x2 +- h( y1 - y0)/d
+		//y = y2 +- h(x1 - x0)/d
+		distance = (hole.x, hole.y, shockwave.x, shockwave.y)
+		a = (Math.pow(shockwave.radius, 2) - Math.pow( hole.size/2, 2) +
+			Math.pow (distance,2))/ (2*distance);
+		h = Math.sqrt (Math.pow (shockwave.radius,2) - a*a);
+		x2 = shockwave.x + a * ( hole.x - shockwave.x) / distance;
+		y2 = shockwave.y + a * ( hole.y - shockwave.y) / distance;
+		xIntersect1 = x2 + h * ( hole.y -  shockwave.y ) / distance;
+		yIntersect1 = y2 + h * ( hole.x - shockwave.x ) / distance;
+		xIntersect2 = x2 - h * ( hole.y -  shockwave.y ) / distance;
+		yIntersect2 = y2 - h * ( hole.x - shockwave.x ) / distance;
 
-
+		if (checkPointOnArc( xIntersect1, yIntersect1, shockwave ) == true
+			 || checkPointOnArc ( xIntersect2, yIntersect2, shockwave) == true ){
+		shockwave.killOnClient();
+		}
+	}
+	//shockwave.killOnClient() ←- a void function of a shockwave that deletes a shockwave on the client’s end
 }
+
+
+
+
 
 /**MAREHAN/JELAN end*/
 
