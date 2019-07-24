@@ -205,7 +205,17 @@ Hole.prototype.collideWithUser = function (character) {
 
 function shockwaveHoleCollide(shockwave, hole) {
 
+//4 properties of the shockwave object can be modified in here would
+//reflect on client end immediately:
+//shockwave.radius
+//shockwave.angleWidth
+//shockwave.angle
+//shockwave.transparency
 }
+
+
+
+
 
 /**MAREHAN/JELAN end*/
 
