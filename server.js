@@ -146,9 +146,6 @@ Shockwave.prototype.collision = function (p) {
 
     var angleToP = Math.atan2(p.y - this.y, p.x - this.x);
     var angleDifference = (angleToP - this.angle);
-    console.log("angle to p: " + angleToP);
-    console.log("my angle: " + this.angle);
-    console.log("shockwave angle width: "+ this.angleWidth);
     if (p.z <= 0 && Math.abs(angleDifference) <= this.angleWidth / 2 &&
       Math.abs(dist(this.x,this.y,p.x,p.y) - (this.radius + 5)) < 10) {
         p.vx = Math.cos(this.angle) * 3;
@@ -207,14 +204,6 @@ Hole.prototype.collideWithUser = function (character) {
 /**MAREHAN/JELAN start*/
 
 function shockwaveHoleCollide(shockwave, hole) {
-
-//4 properties of the shockwave object can be modified in here would
-//reflect on client end immediately:
-//shockwave.radius
-//shockwave.angleWidth
-//shockwave.angle
-//shockwave.transparency
-
 
 }
 
@@ -413,7 +402,7 @@ function gameSingleFrame() {
       var s = a[i];
       s.move();
       for (var j = 0; j < holes.length; j++) {
-        shockwaveHoleCollide(s, holes[i]);
+        shockwaveHoleCollide(s, holes[j]);
       }
 
       //dealing with collisions with characters, not yet implemented
@@ -431,7 +420,6 @@ function gameSingleFrame() {
           s.killOnClient();
           a.splice(i, 1);
           i--;
-          console.log(a.length);
       }
     }
 
