@@ -211,9 +211,11 @@ function shockwaveHoleCollide(shockwave, hole) {
 //shockwave.angleWidth
 //shockwave.angle
 //shockwave.transparency
-
-
 }
+
+
+
+
 
 /**MAREHAN/JELAN end*/
 
@@ -410,7 +412,7 @@ function gameSingleFrame() {
       var s = a[i];
       s.move();
       for (var j = 0; j < holes.length; j++) {
-        shockwaveHoleCollide(s, holes[i]);
+        shockwaveHoleCollide(s, holes[j]);
       }
 
       //dealing with collisions with characters, not yet implemented
@@ -428,7 +430,6 @@ function gameSingleFrame() {
           s.killOnClient();
           a.splice(i, 1);
           i--;
-          console.log(a.length);
       }
     }
 
