@@ -12,6 +12,7 @@
         #myCanvas {
           position: absolute;
           left: 55px;
+          top: 50px;
           border:1px solid #DDDDDD;
           z-index: -1;
         }
@@ -51,6 +52,13 @@
         #inputbox {
           border: 1px solid #DDDDDD;
         }
+        #background_image {
+          position: absolute;
+          visibility: hidden;
+          z-index: -2;
+          width:90%;
+          height:90%;
+        }
 
         </style>
         <script src="/socket.io/socket.io.js"></script>
@@ -60,7 +68,7 @@
 
 
     <body>
-
+      <img src="https://i.ibb.co/9TRTWNp/backgroundimage.png" id="background_image">
 
 
         <canvas id="myCanvas" width="1140" height="500">
@@ -160,27 +168,46 @@ CharacterData.prototype.display = function(ctx, x, y) {
   var shift = 3 + (this.z) * 20;
   ctx.save();
   ctx.translate(x, y);
+
   ctx.save();
   ctx.translate(1 + shift, -1 - shift);
   ctx.rotate(this.r);
-  ctx.beginPath();
-  ctx.rect(-10,-10, 20 * scaleSize, 20 * scaleSize);
-
-  ctx.fillStyle = 'rgba(0,0,0,0.2)';
+    ctx.beginPath();
+    ctx.rect(-10,-10, 20 * scaleSize, 20 * scaleSize);
+    ctx.fillStyle = '#000000';
+    ctx.globalAlpha = 0.8 - (scaleSize) / 2.5;
+    ctx.closePath();
   ctx.fill();
   ctx.restore();
+
+
   ctx.save();
   ctx.rotate(this.r);
   ctx.beginPath();
   ctx.rect(-10,-10, 20 * scaleSize, 20 * scaleSize);
   ctx.strokeStyle = 'rgba(0,0,0,0.7)';
-  ctx.fillStyle = 'rgba(255,255,2355,1)';
+  ctx.fillStyle = "white";
   ctx.fill();
-  ctx.stroke();
+  ctx.closePath();
   ctx.restore();
-  ctx.font = "20px Arial";
-  ctx.strokeText(this.name + ":" + this.life, - 20, - 34);
+
+
+    ctx.beginPath();
+    ctx.globalAlpha =  1;
+    ctx.font = "20px Arial";
+    ctx.rect(-20, -32, 40, 6);
+    ctx.fillStyle = "red";
+    ctx.fill();
+    ctx.closePath();
+    ctx.beginPath();
+    ctx.rect(-20, -32, this.life / 100 * 40, 6);
+    ctx.fillStyle = "green";
+    ctx.fill();
+    ctx.closePath();
+  ctx.strokeText(this.name, - 20, - 38);
   ctx.restore();
+
+
 };
 
 CharacterData.prototype.acceptPositionUpdate = function(x, y, z, r, vel) {
@@ -302,8 +329,23 @@ Shockwave.prototype.display = function(ctx) {
   ctx.beginPath();
   ctx.translate(this.x, this.y);
   ctx.rotate(this.angle);
+  ctx.shadowBlur = 20;
+  ctx.shadowColor = "black";
+  ctx.strokeStyle = "101010";
   ctx.arc(0,0, this.radius, -this.angleWidth/2, this.angleWidth/2);
   ctx.stroke();
+
+  ctx.closePath();
+  ctx.beginPath();
+
+  ctx.globalAlpha = 0.4;
+  ctx.strokeStyle = "101010";
+  ctx.arc(0,0, this.radius * 0.9, -this.angleWidth/2, this.angleWidth/2);
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+
+  ctx.closePath();
+
   ctx.restore();
 }
 Shockwave.prototype.acceptPositionUpdate = function(angle, angleWidth, radius, transparency){
@@ -485,8 +527,11 @@ function drawCanvas () {
 
       ctx.beginPath();
       ctx.rect(-10, -10, canvasWidth + 20, canvasHeight + 20);
-      ctx.fillStyle = "white";
+      ctx.fillStyle = "#FFFFFF";
+
       ctx.fill();
+
+
 
       ctx.font = "30px Arial";
 
@@ -494,6 +539,8 @@ function drawCanvas () {
         ctx.save();
         ctx.translate(canvasWidth/2 - myCharacter.x, canvasHeight/2 - myCharacter.y);
 
+        var img = document.getElementById("background_image");
+        ctx.drawImage(img, -MAP_SIZE / 2, -MAP_SIZE / 2);
 
         ctx.rect(-MAP_SIZE / 2, -MAP_SIZE / 2, MAP_SIZE, MAP_SIZE);
         ctx.strokeStyle = "black";
