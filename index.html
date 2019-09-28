@@ -52,12 +52,46 @@
         #inputbox {
           border: 1px solid #DDDDDD;
         }
+        #apology {
+          position: absolute;
+          left: 0%;
+          top: 70%;
+          padding: 10px 20px;
+          background-color: #EEEEEE;
+          font-family: Arial;
+          font-style: italic;
+          font-size: 12px;
+        }
         #background_image {
           position: absolute;
           visibility: hidden;
           z-index: -2;
           width:90%;
           height:90%;
+        }
+        #title_image {
+            width: 30%;
+            position: relative;
+            left:36%;
+            top: 100px;
+        }
+        #title_background {
+            position: absolute;
+            left:24%;
+            top:20%
+        }
+        #connStatus {
+            position: relative;
+            left:5%;
+            top:5%
+            font-style: bold;
+            padding: 10px;
+            font-size: 20px;
+            font-family: arial;
+            width: 200px;
+            background-color: #BBBBBB;
+            color: #FFFFFF;
+            
         }
 
         </style>
@@ -71,13 +105,12 @@
       <img src="https://i.ibb.co/9TRTWNp/backgroundimage.png" id="background_image">
 
 
+      
+      
         <canvas id="myCanvas" width="1140" height="500">
           Your browser does not support the HTML5 canvas tag.
         </canvas>
 
-        <div id="header">
-        <h1 class="toHide">Shockwave.io</h1>
-        </div>
 
 
         <script>
@@ -85,10 +118,13 @@
 //https://stackoverflow.com/questions/5203407/how-to-detect-if-multiple-keys-are-pressed-at-once-using-javascript
 
 const RESPAWN_TIMER = 40;
+const TWO_PI = Math.PI * 2;
 
 var canvasWidth = 1140;
 var canvasHeight = 500;
 var MAP_SIZE;
+var shakeX = 0;
+var shakeY = 0;
 
 var keyMap = {};
 onkeydown = onkeyup = function(e){
@@ -110,6 +146,7 @@ var playerAlive = true;
 var thisWaitTimer = -1;
 var waitingForRespawning = false;
 var myName = "";
+var connectedToServer = false;
 
 //from https://nerdparadise.com/programming/javascriptmouseposition
 function updateMouse(mouseEvent) {
@@ -170,10 +207,10 @@ CharacterData.prototype.display = function(ctx, x, y) {
   ctx.translate(x, y);
 
   ctx.save();
-  ctx.translate(1 + shift, -1 - shift);
+  ctx.translate(1 + shift, -1- shift);
+    ctx.beginPath(); 
   ctx.rotate(this.r);
-    ctx.beginPath();
-    ctx.rect(-10,-10, 20 * scaleSize, 20 * scaleSize);
+    ctx.arc(0,0, 15 * scaleSize, 0, TWO_PI);
     ctx.fillStyle = '#000000';
     ctx.globalAlpha = 0.8 - (scaleSize) / 2.5;
     ctx.closePath();
@@ -183,13 +220,46 @@ CharacterData.prototype.display = function(ctx, x, y) {
 
   ctx.save();
   ctx.rotate(this.r);
+  ctx.scale(scaleSize / 2, scaleSize / 2);
   ctx.beginPath();
-  ctx.rect(-10,-10, 20 * scaleSize, 20 * scaleSize);
+  ctx.arc(0,0, 30, 0, TWO_PI);
   ctx.strokeStyle = 'rgba(0,0,0,0.7)';
-  ctx.fillStyle = "white";
+  ctx.fillStyle = "#fc9403";
   ctx.fill();
   ctx.closePath();
+
+  ctx.beginPath();
+  ctx.rect(5,-8,6,6);
+  ctx.rect(5,8,6,6);
+  ctx.fillStyle = "#000000";
+  ctx.fill();
+  ctx.closePath();
+
   ctx.restore();
+
+  ctx.beginPath();
+  ctx.arc(0,0, 12 * scaleSize, -1.35, -0.16);
+  ctx.lineWidth = 5;
+  ctx.strokeStyle = "rgba(166,80,0)";
+  ctx.globalAlpha = 0.4;
+  ctx.stroke();
+  ctx.closePath();
+
+
+
+  ctx.beginPath();
+  ctx.arc(0,0, 12 * scaleSize, 1.8, 3);
+  ctx.lineWidth = 5;
+  ctx.strokeStyle = "rgba(255,255,255)";
+  ctx.globalAlpha = 0.4;
+  ctx.stroke();
+  ctx.closePath();
+
+  ctx.globalAlpha = 1;
+  ctx.lineWidth = 1;
+
+
+
 
 
     ctx.beginPath();
@@ -358,14 +428,14 @@ Shockwave.prototype.acceptPositionUpdate = function(angle, angleWidth, radius, t
 //JELAN
 var Hole = function (x, y, size) {
     this.x = x;
-    this.y = x;
+    this.y = y;
     this.size = size;
 };
 Hole.prototype.display = function(ctx) {
   ctx.save();
   ctx.beginPath();
   ctx.translate(this.x, this.y);
-  ctx.arc(0,0, this.size, this.size, 0, 2 * Math.PI);
+  ctx.arc(0,0, this.size, this.size, 0, TWO_PI);
   ctx.fillStyle = "black";
   ctx.fill();
   ctx.restore();
@@ -381,7 +451,7 @@ var updated = false;
 var numOfMessages = 0;
 
 
-var socket = io.connect('localhost:40378');
+var socket = io.connect('shockwave-io.com:40000');
 socket.on('message', function(message) {
   var messagesElem = document.getElementById("messages");
     messagesElem.innerHTML += message +"<br/>";
@@ -530,6 +600,10 @@ function drawCanvas () {
       ctx.fillStyle = "#FFFFFF";
 
       ctx.fill();
+      
+      
+        var img = document.getElementById("background_image");
+        ctx.drawImage(img, -MAP_SIZE / 2, -MAP_SIZE / 2, MAP_SIZE * 2, MAP_SIZE * 2);
 
 
 
@@ -538,13 +612,21 @@ function drawCanvas () {
       if (playerAlive && myCharacter != null) {
         ctx.save();
         ctx.translate(canvasWidth/2 - myCharacter.x, canvasHeight/2 - myCharacter.y);
+        ctx.translate(shakeX, shakeY);
 
         var img = document.getElementById("background_image");
-        ctx.drawImage(img, -MAP_SIZE / 2, -MAP_SIZE / 2);
+        ctx.drawImage(img, -MAP_SIZE / 2, -MAP_SIZE / 2, MAP_SIZE * 2, MAP_SIZE * 2);
 
+        ctx.beginPath();
         ctx.rect(-MAP_SIZE / 2, -MAP_SIZE / 2, MAP_SIZE, MAP_SIZE);
         ctx.strokeStyle = "black";
+        ctx.globalAlpha = 0.3;
+        ctx.lineWidth = 20;
         ctx.stroke();
+        ctx.closePath();
+
+        ctx.globalAlpha = 1;
+        ctx.lineWidth = 1;
 
 
         for (var i = 0; i < holes.length; i++) {
@@ -576,16 +658,35 @@ function drawCanvas () {
             ctx.restore();
         }
         ctx.restore();
+      } else {
+          
       }
 
 
 
       ctx.font = "20px Arial";
 
-      if (!playerAlive){
-              ctx.strokeText("You're dead! Click to respawn", canvasWidth / 2, canvasHeight / 2);
+      if (!playerAlive && !waitingForRespawning){
+          ctx.strokeText("You're dead! Click to respawn", canvasWidth / 2, canvasHeight / 2);
+      } else if (waitingForRespawning){
+        ctx.strokeText("Respawning...", canvasWidth / 2, canvasHeight / 2);
       }
 
+      if (myID != -1 && characterDatas.size == 1){
+          ctx.strokeText("Waiting for players...", canvasWidth / 2, canvasHeight / 3);
+
+      }
+
+      if (shockwaves.get(myID) != null) {
+        var ssizes =  shockwaves.get(myID).size;
+        if (ssizes > 0) {
+          shakeX = -5 + Math.random() * 10;
+          shakeY = -5 + Math.random() * 10;
+        } else {
+          shakeX = 0;
+          shakeY = 0;
+        }
+      }
 }
 
 function incrementScore(){
@@ -629,6 +730,14 @@ document.addEventListener('keydown', function(event) {
 });
 
 function gameSingleFrame() {
+    
+    connectedToServer = socket.connected;
+    if (connectedToServer) {
+        document.getElementById("connStatus").innerHTML = "Connection Status: Connected";
+    } else {
+        document.getElementById("connStatus").innerHTML = "Connection Status: Disconnected";
+    }
+    
     drawCanvas();
     if (playerAlive && characterDatas.get(myID) != null) {
       characterDatas.get(myID).movement();
@@ -662,14 +771,23 @@ document.getElementById("myCanvas").onmousemove = updateMouse;
 
         </script>
 
+        <img class="toHide" src="https://i.ibb.co/N3R9LmK/titlebackground.png" id="title_background" width="604px" height="400px">
+        <img class="toHide" src="https://i.ibb.co/2SvH7Q1/shockwaveio-title.png" id="title_image">
+        
+        <div id="header">
+        <h1 class="toHide"></h1>
+        </div>
+        <div id="connStatus" class="toHide"></div>
 
         <div id="textBlock">
-        <div class="toHide">Enter your name here:</div>
+        <div id="apology" class="toHide">Our hosting service doesn't let us run our game server 24/7 in the background unfortunately<br>So the server might not respond if we're not running it.</div>
+        <div class="toHide">Enter your name:</div>
         <input onfocus="if (this.value == 'Enter message'){this.value='';}" onblur="if (this.value == ''){this.value='Enter message';}" id="inputbox" type="text" name="inputText" value="" autocomplete="off">
 
         <button id="button" class="toHide" onClick=sendStuff()>Enter game</button>
         <div id="messages"></div>
         </div>
+        
       <script>
       document.getElementById("inputbox").addEventListener("keyup", function(event) {
          if (event.keyCode == '13') {
