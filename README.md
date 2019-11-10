@@ -13,9 +13,7 @@ Shop to upgrade and customize your weapons (phase 2)
 
 Team members:
 Haocheng Li
-Kevin Zhang
 Jelan Waly
-Elina Shankar
 Victoria Edeeva
 Richard To
 Elise Kim
