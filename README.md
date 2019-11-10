@@ -17,3 +17,4 @@ Jelan Waly
 Victoria Edeeva
 Richard To
 Elise Kim
+Kevin Dong
