@@ -1,6 +1,6 @@
 # Shockwave.io
 
-A collaboration between 6 students. A multiplayer game hosted on A2Hosting, coded with Node.js/javascript.
+A collaboration between 4 students. A multiplayer game hosted on A2Hosting, coded with Node.js/javascript.
 
 The game uses the Socket.io library for TCP sockets. A HTML5 canvas was used, and Node.js handles backend.
 
@@ -15,6 +15,4 @@ Team members:
 Haocheng Li
 Jelan Waly
 Victoria Edeeva
-Richard To
 Elise Kim
-Kevin Dong
