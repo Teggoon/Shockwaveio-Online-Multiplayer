@@ -20,7 +20,7 @@ var canvasHeight = 500;
 var server = http.createServer(function(req, res) {
 
     console.log('A client is connected!');
-    fs.readFile('index.html', 'utf-8', function(error, content) {
+    fs.readFile('src/index.html', 'utf-8', function(error, content) {
         res.writeHead(200, {"Content-Type": "text/html"});
         res.end(content);
     });
