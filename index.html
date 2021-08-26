@@ -83,7 +83,7 @@
         #connStatus {
             position: relative;
             left:5%;
-            top:5%
+            top:5%;
             font-style: bold;
             padding: 10px;
             font-size: 20px;
@@ -451,7 +451,8 @@ var updated = false;
 var numOfMessages = 0;
 
 
-var socket = io.connect('shockwave-io.com:40000');
+// var socket = io.connect('shockwave-io.com:40000');
+var socket = io.connect('localhost:40378');
 socket.on('message', function(message) {
   var messagesElem = document.getElementById("messages");
     messagesElem.innerHTML += message +"<br/>";

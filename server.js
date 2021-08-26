@@ -226,7 +226,7 @@ function shockwaveHoleCollide(shockwave, hole) {
 
 
 // Loading socket.io
-var io = require('socket.io').listen(server);
+var io = require('socket.io')(server);
 
 
 
@@ -336,7 +336,7 @@ function initHoles() {
     var x = Math.random() * MAP_SIZE;
     var y = Math.random() * MAP_SIZE;
     var size = 50 + Math.random() * 100;
-    //holes.push(new Hole(x, y, size));
+    holes.push(new Hole(x, y, size));
   }
   holes.push(new Hole(200,200, 150));
 };

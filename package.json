@@ -1,0 +1,27 @@
+{
+  "name": "shockwaveio-game",
+  "version": "1.0.0",
+  "description": "A game we worked on back in 2019",
+  "main": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Teggoon/Shockwaveio-Online-Multiplayer-Game.git"
+  },
+  "keywords": [
+    "game",
+    "online",
+    "multiplayer",
+    "project"
+  ],
+  "author": "Haocheng Li, Jelan Waly, Elise Kim, Victoria Edeeva",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Teggoon/Shockwaveio-Online-Multiplayer-Game/issues"
+  },
+  "homepage": "https://github.com/Teggoon/Shockwaveio-Online-Multiplayer-Game#readme",
+  "dependencies": {
+    "fs": "0.0.1-security",
+    "http": "0.0.1-security",
+    "socket.io": "^4.1.3"
+  }
+}
