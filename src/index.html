@@ -102,7 +102,7 @@
 
 
     <body>
-      <img src="https://i.ibb.co/9TRTWNp/backgroundimage.png" id="background_image">
+      <!-- <img src="https://i.ibb.co/9TRTWNp/backgroundimage.png" id="background_image"> -->
 
 
       
@@ -452,7 +452,7 @@ var numOfMessages = 0;
 
 
 // var socket = io.connect('shockwave-io.com:40000');
-var socket = io.connect('localhost:40378');
+var socket = io.connect('localhost:5000');
 socket.on('message', function(message) {
   var messagesElem = document.getElementById("messages");
     messagesElem.innerHTML += message +"<br/>";
@@ -772,8 +772,8 @@ document.getElementById("myCanvas").onmousemove = updateMouse;
 
         </script>
 
-        <img class="toHide" src="https://i.ibb.co/N3R9LmK/titlebackground.png" id="title_background" width="604px" height="400px">
-        <img class="toHide" src="https://i.ibb.co/2SvH7Q1/shockwaveio-title.png" id="title_image">
+        <!-- <img class="toHide" src="https://i.ibb.co/N3R9LmK/titlebackground.png" id="title_background" width="604px" height="400px"> -->
+        <img class="toHide" src="./shockwaveio_title.png" id="title_image" alt="Shockwave.io">
         
         <div id="header">
         <h1 class="toHide"></h1>
@@ -781,7 +781,7 @@ document.getElementById("myCanvas").onmousemove = updateMouse;
         <div id="connStatus" class="toHide"></div>
 
         <div id="textBlock">
-        <div id="apology" class="toHide">Our hosting service doesn't let us run our game server 24/7 in the background unfortunately<br>So the server might not respond if we're not running it.</div>
+        <!-- <div id="apology" class="toHide">Our hosting service doesn't let us run our game server 24/7 in the background unfortunately<br>So the server might not respond if we're not running it.</div> -->
         <div class="toHide">Enter your name:</div>
         <input onfocus="if (this.value == 'Enter message'){this.value='';}" onblur="if (this.value == ''){this.value='Enter message';}" id="inputbox" type="text" name="inputText" value="" autocomplete="off">
 

@@ -1,5 +1,6 @@
 var http = require('http');
 var fs = require('fs');
+var Shockwave = require("./Shockwave");
 
 
 /**IMPORTANT GAME VARIABLES HERE*/
@@ -325,8 +326,8 @@ io.on('connection', function(socket){
 
 
 
-server.listen(40378);
-console.log("Socket is listening!");
+server.listen(5000);
+console.log("Socket is listening on port 5000");
 
 
 
