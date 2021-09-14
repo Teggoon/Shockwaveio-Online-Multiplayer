@@ -1,0 +1,90 @@
+
+
+@font-face {
+font-family: Phage;
+src: url(Phage_Rough.oft) format(opentype);
+}
+#myCanvas {
+position: absolute;
+left: 55px;
+top: 50px;
+border:1px solid #DDDDDD;
+z-index: -1;
+}
+#textBlock {
+position: absolute;
+left: 40%;
+top: 50%;
+height:100px;
+}
+#messages {
+overflow:auto;
+margin-top: 8px;
+width:200px;
+height:70px;
+}
+h1 {
+position: relative;
+top:70px;
+font-size: 40px;
+font-family: Phage, "Dead Kansas", Arial;
+}
+#header  {
+text-align: center;
+z-index:10;
+}
+#button {
+border: none;
+margin: 5px 5px;
+padding: 4px 9px;
+}
+#button:hover {
+background-color: #DDDDDD;
+border: none;
+margin: 5px 5px;
+padding: 4px 9px;
+}
+#inputbox {
+border: 1px solid #DDDDDD;
+}
+#apology {
+position: absolute;
+left: 0%;
+top: 70%;
+padding: 10px 20px;
+background-color: #EEEEEE;
+font-family: Arial;
+font-style: italic;
+font-size: 12px;
+}
+#background_image {
+position: absolute;
+visibility: hidden;
+z-index: -2;
+width:90%;
+height:90%;
+}
+#title_image {
+    width: 30%;
+    position: relative;
+    left:36%;
+    top: 100px;
+}
+#title_background {
+    position: absolute;
+    left:55px;
+    top:50px
+}
+#connStatus {
+    position: relative;
+    left:5%;
+    top:5%;
+    font-style: bold;
+    padding: 10px;
+    font-size: 20px;
+    font-family: arial;
+    width: 200px;
+    background-color: #BBBBBB;
+    color: #FFFFFF;
+    
+}
