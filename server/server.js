@@ -46,15 +46,14 @@ var holes = [];
 
 
 //JELAN, VICTORIA
-var Hole = function(x,y,size) {
+function Hole(x,y,size) {
     this.x = x;
     this.y = y;
     this.size = size;
 };
-Hole.prototype.collideWithUser = function (character) {
+Hole.prototype.checkCollisionWithUser = function (character) {
 /**VICTORIA start*/
     if ( (dist(this.x, this.y, character.x, character.y) <= this.size) && character.z <= 0){
-      sendDeathToClient(character);
       return true;
     }
 /**VICTORIA end*/
@@ -243,7 +242,10 @@ function gameSingleFrame() {
     c.checkDie(sendDeathToClient);
 
     for (var i = 0; i < holes.length; i ++) {
-      holes[i].collideWithUser(c);
+      const collidedWithUser = holes[i].checkCollisionWithUser(c);
+      if (collidedWithUser) {
+        sendDeathToClient(c);
+      }
     }
 
   }
