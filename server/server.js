@@ -4,7 +4,7 @@ const app = express();
 const http = require('http').Server(app);
 const path = require("path");
 const Shockwave = require("./Shockwave");
-const Character = require("./Character");
+const User = require("./User");
 
 app.use('/static', express.static(path.join(__dirname, '../public')))
 
@@ -47,24 +47,7 @@ function dist(x1, y1, x2, y2) {
 }
 
 
-/**
-CLASS User
-Constructor:
-@param: integer ID
-@param: name of the user
-@param: the socket connection of the user
-*/
-function User (id, name, sock) {
-    this.name = name;
-    this.socket = sock;
-    this.id = id;
-    var spawnLocationX = 0;
-    var spawnLocationY = 0;
 
-    //make a new character for the user
-    this.character = new Character(id, name, this, spawnLocationX, spawnLocationY);
-    this.score = 0;
-}
 
 
 
