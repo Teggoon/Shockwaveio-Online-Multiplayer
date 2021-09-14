@@ -3,8 +3,9 @@ const express = require("express");
 const app = express();
 const http = require('http').Server(app);
 const path = require("path");
-const Shockwave = require("./Shockwave");
-const User = require("./User");
+const Shockwave = require("./class/Shockwave");
+const User = require("./class/User");
+const dist = require("./function/dist");
 
 app.use('/static', express.static(path.join(__dirname, '../public')))
 
@@ -34,17 +35,7 @@ var idCounter = 1; //counter for user's ID
 var shockwaveCounter = 1; //counter for shockwave's ID
 var holes = [];
 
-/**
-@param: first item's x position
-@param: first item's y position
-@param: second item's x position
-@param: second item's y position
-@return the distance between them on the Cartesian plane
-*/
-//JELAN, KEVIN, VICTORIA
-function dist(x1, y1, x2, y2) {
-  return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-}
+
 
 
 
