@@ -5,7 +5,7 @@ const http = require('http').Server(app);
 const path = require("path");
 const Shockwave = require("./class/Shockwave");
 const User = require("./class/User");
-const dist = require("./function/dist");
+const Hole = require("./class/Hole");
 
 app.use('/static', express.static(path.join(__dirname, '../public')))
 
@@ -34,33 +34,6 @@ var shockwaves = new Map(); //map of all the shockwaves
 var idCounter = 1; //counter for user's ID
 var shockwaveCounter = 1; //counter for shockwave's ID
 var holes = [];
-
-
-
-
-
-
-
-
-
-
-
-//JELAN, VICTORIA
-function Hole(x,y,size) {
-    this.x = x;
-    this.y = y;
-    this.size = size;
-};
-Hole.prototype.checkCollisionWithUser = function (character) {
-/**VICTORIA start*/
-    if ( (dist(this.x, this.y, character.x, character.y) <= this.size) && character.z <= 0){
-      return true;
-    }
-/**VICTORIA end*/
-  return false;
-};
-
-
 
 /**MAREHAN/JELAN start*/
 
