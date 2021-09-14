@@ -1,6 +1,16 @@
-var http = require('http');
-var fs = require('fs');
-var Shockwave = require("./Shockwave");
+const express = require("express");
+
+const app = express();
+const http = require('http').Server(app);
+const path = require("path");
+
+app.use('/static', express.static(path.join(__dirname, '../public')))
+
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+var io = require('socket.io')(http);
 
 
 /**IMPORTANT GAME VARIABLES HERE*/
@@ -12,21 +22,6 @@ const PLAYER_ROUGH_RADIUS = 14;
 
 var canvasWidth = 1140;
 var canvasHeight = 500;
-
-
-/*
-* https://openclassrooms.com/en/courses/2504541-ultra-fast-applications-using-node-js/2505653-socket-io-let-s-go-to-real-time
-*/
-// Loading the index file . html displayed to the client
-var server = http.createServer(function(req, res) {
-
-    console.log('A client is connected!');
-    fs.readFile('src/index.html', 'utf-8', function(error, content) {
-        res.writeHead(200, {"Content-Type": "text/html"});
-        res.end(content);
-    });
-
-});
 
 var socketUserMap = new Map();
 
@@ -222,15 +217,6 @@ function shockwaveHoleCollide(shockwave, hole) {
 
 
 
-
-
-
-
-// Loading socket.io
-var io = require('socket.io')(server);
-
-
-
 io.on('connection', function(socket){
   console.log('a user connected');
 
@@ -323,11 +309,6 @@ io.on('connection', function(socket){
     });
 
 });
-
-
-
-server.listen(5000);
-console.log("Socket is listening on port 5000");
 
 
 
@@ -450,3 +431,10 @@ initHoles();
 
 //run above function once every 24 milliseconds
 setInterval(gameSingleFrame, 24);
+
+
+
+
+http.listen(5000, function() {
+   console.log('listening on *:5000');
+})
