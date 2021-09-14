@@ -3,6 +3,8 @@ const express = require("express");
 const app = express();
 const http = require('http').Server(app);
 const path = require("path");
+const Shockwave = require("./Shockwave");
+const Character = require("./Character");
 
 app.use('/static', express.static(path.join(__dirname, '../public')))
 
@@ -66,119 +68,8 @@ function User (id, name, sock) {
 
 
 
-/**
-CLASS Character:
-An in-game character belonging to a user.
-Constructor:
-@param: integer ID
-@param: name of the character
-@param: the user object it belongs to
-@param: initial x position
-@param: initial y position
-*/
-//VICTORIA
-function Character (id, name, user, x, y) {
-    this.id = id;
-    this.user = user;
-    this.x = x;
-    this.y = y; //position in the air, 0 means on the ground
-    this.z = 0;
-    this.r = 0;
-    this.score = 0;
-    this.name = name;
-    this.vx = 0;
-    this.vy = 0;
-    this.velocity = 10;
-    this.life = 100;
-}
-Character.prototype.acceptPositionUpdate = function(x, y, z, r) {
-  this.x = x;
-  this.y = y;
-  this.z = z;
-  this.r = r;
-}
-
-Character.prototype.checkDie = function() {
-  if (this.life <= 0) {
-    sendDeathToClient(this);
-  }
-};
-
-Character.prototype.sendPositionUpdate = function() {
-  io.emit("update position", this.id, this.x, this.y, this.z, this.r, this.velocity);
-};
-
-Character.prototype.sendPositionUpdateOVERRIDE = function() {
-  io.emit("OVERRIDE position", this.id, this.x, this.y, this.z, this.r, this.velocity);
-};
-
-Character.prototype.sendStatusUpdate = function() {
-  io.emit("update stats", this.id, this.score, this.life);
-};
 
 
-//JELAN, KEVIN
-function Shockwave (id, shockwaveID, x, y, angle, angleWidth, velocity, tV) {
-    this.angle = angle;
-    this.angleWidth = angleWidth / 180 * Math.PI; //sweep of the arc
-    this.x=x;
-    this.y=y;
-    this.velocity = velocity;
-    this.transparency = 255;
-    this.transparencyV = tV;
-    this.radius = 0;
-    this.id = id;
-    this.shockwaveID = shockwaveID;
-}
-Shockwave.prototype.move = function () {
-    this.transparency -= this.transparencyV;
-    this.radius += this.velocity;
-};
-
-Shockwave.prototype.collision = function (p) {
-    if (p.id == this.id) {
-        return;
-    }
-
-    var angleToP = Math.atan2(p.y - this.y, p.x - this.x);
-    var angleDifference = (angleToP - this.angle);
-    if (p.z <= 0 && Math.abs(angleDifference) <= this.angleWidth / 2 &&
-      Math.abs(dist(this.x,this.y,p.x,p.y) - (this.radius + 5)) < 10) {
-        p.vx = Math.cos(this.angle) * 3;
-        p.vy = Math.sin(this.angle) * 3;
-        p.life -= 15;
-        p.sendStatusUpdate();
-    }
-
-};
-/**
-Check if current shockwave should be deleted
-*/
-Shockwave.prototype.checkDie = function() {
-  if (this.transparency <= 0) {
-    return true;
-  }
-  /**KEVIN start*/
-
-  /**KEVIN end*/
-
-  return false;
-};
-
-/**
-Function that sends instruction to all clients to delete current shockwave
-*/
-Shockwave.prototype.killOnClient = function() {
-  io.emit("kill shockwave", this.id, this.shockwaveID);
-};
-
-/**
-Function that sends all clients the info of the current shockwave
-*/
-Shockwave.prototype.updateOnClient = function() {
-  //id, shockwaveID, x, y, angle, radius, velocity, tV
-  io.emit("update shockwave", this.id, this.shockwaveID, this.x, this.y, this.angle, this.angleWidth, this.radius, this.velocity, this.transparency, this.transparencyV);
-};
 
 //JELAN, VICTORIA
 var Hole = function(x,y,size) {
@@ -189,8 +80,9 @@ var Hole = function(x,y,size) {
 Hole.prototype.collideWithUser = function (character) {
 /**VICTORIA start*/
     if ( (dist(this.x, this.y, character.x, character.y) <= this.size) && character.z <= 0){
-    sendDeathToClient(character);
-        return true;}
+      sendDeathToClient(character);
+      return true;
+    }
 /**VICTORIA end*/
   return false;
 };
@@ -346,20 +238,20 @@ function containCharacterInMap(c) {
       if (c.x - PLAYER_ROUGH_RADIUS < -MAP_SIZE / 2) {
         c.x = -MAP_SIZE / 2 + PLAYER_ROUGH_RADIUS;
         c.vx = 0;
-        c.sendPositionUpdateOVERRIDE();
+        c.sendPositionUpdateOVERRIDE(io);
       } else if (c.x + PLAYER_ROUGH_RADIUS >  MAP_SIZE / 2) {
         c.x =  MAP_SIZE / 2 - PLAYER_ROUGH_RADIUS;
         c.vx = 0;
-        c.sendPositionUpdateOVERRIDE();
+        c.sendPositionUpdateOVERRIDE(io);
       }
       if (c.y + PLAYER_ROUGH_RADIUS >  MAP_SIZE / 2) {
         c.y =  MAP_SIZE / 2 - PLAYER_ROUGH_RADIUS;
         c.vy = 0;
-        c.sendPositionUpdateOVERRIDE();
+        c.sendPositionUpdateOVERRIDE(io);
       } else if (c.y - PLAYER_ROUGH_RADIUS  < -MAP_SIZE / 2) {
         c.y =  -MAP_SIZE / 2 + PLAYER_ROUGH_RADIUS;
         c.vy = 0;
-        c.sendPositionUpdateOVERRIDE();
+        c.sendPositionUpdateOVERRIDE(io);
       }
 }
 
@@ -372,9 +264,9 @@ function gameSingleFrame() {
   for (let [k, c] of characters){
     //update all clients of all players
     io.emit("update stats", c.id, c.score, c.life);
-    c.sendPositionUpdate();
+    c.sendPositionUpdate(io);
     containCharacterInMap(c);
-    c.checkDie();
+    c.checkDie(sendDeathToClient);
 
     for (var i = 0; i < holes.length; i ++) {
       holes[i].collideWithUser(c);
@@ -404,12 +296,12 @@ function gameSingleFrame() {
         s.collision(c);
       }
 
-      s.updateOnClient();
+      s.updateOnClient(io);
 
 
       //check whether to kill the current shockwave
       if (s.checkDie()) {
-          s.killOnClient();
+          s.killOnClient(io);
           a.splice(i, 1);
           i--;
       }
