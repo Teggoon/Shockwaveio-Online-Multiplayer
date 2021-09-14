@@ -77,8 +77,8 @@
         }
         #title_background {
             position: absolute;
-            left:24%;
-            top:20%
+            left:55px;
+            top:50px
         }
         #connStatus {
             position: relative;
@@ -102,7 +102,7 @@
 
 
     <body>
-      <!-- <img src="https://i.ibb.co/9TRTWNp/backgroundimage.png" id="background_image"> -->
+      <img class="toHide" src="/static/background_image.png" id="background_image">
 
 
       
@@ -603,8 +603,8 @@ function drawCanvas () {
       ctx.fill();
       
       
-        // var img = document.getElementById("background_image");
-        // ctx.drawImage(img, -MAP_SIZE / 2, -MAP_SIZE / 2, MAP_SIZE * 2, MAP_SIZE * 2);
+        var img = document.getElementById("background_image");
+        ctx.drawImage(img, -MAP_SIZE / 2, -MAP_SIZE / 2, MAP_SIZE * 2, MAP_SIZE * 2);
 
 
 
@@ -615,8 +615,8 @@ function drawCanvas () {
         ctx.translate(canvasWidth/2 - myCharacter.x, canvasHeight/2 - myCharacter.y);
         ctx.translate(shakeX, shakeY);
 
-        // var img = document.getElementById("background_image");
-        // ctx.drawImage(img, -MAP_SIZE / 2, -MAP_SIZE / 2, MAP_SIZE * 2, MAP_SIZE * 2);
+        var img = document.getElementById("background_image");
+        ctx.drawImage(img, -MAP_SIZE / 2, -MAP_SIZE / 2, MAP_SIZE * 2, MAP_SIZE * 2);
 
         ctx.beginPath();
         ctx.rect(-MAP_SIZE / 2, -MAP_SIZE / 2, MAP_SIZE, MAP_SIZE);
@@ -772,7 +772,7 @@ document.getElementById("myCanvas").onmousemove = updateMouse;
 
         </script>
 
-        <!-- <img class="toHide" src="https://i.ibb.co/N3R9LmK/titlebackground.png" id="title_background" width="604px" height="400px"> -->
+        <img class="toHide" src="static/background_image.png" id="title_background" width="1140px" height="500px">
         <img class="toHide" src="static/shockwaveio_title.png" id="title_image" alt="Shockwave.io">
         
         <div id="header">
