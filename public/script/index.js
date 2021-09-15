@@ -3,8 +3,8 @@
 const RESPAWN_TIMER = 40;
 const TWO_PI = Math.PI * 2;
 
-var canvasWidth = 1140;
-var canvasHeight = 500;
+var canvasWidth = window.innerWidth;
+var canvasHeight = window.innerHeight;
 var MAP_SIZE;
 var shakeX = 0;
 var shakeY = 0;
@@ -25,6 +25,8 @@ var myCharacter;
 var mouseX = 0;
 var mouseY = 0;
 var c = document.getElementById("myCanvas");
+c.setAttribute("width", window.innerWidth);
+c.setAttribute("height", window.innerHeight);
 var playerAlive = true;
 var thisWaitTimer = -1;
 var waitingForRespawning = false;
@@ -557,7 +559,9 @@ function drawCanvas () {
       }
 
       if (myID != -1 && characterDatas.size == 1){
+          ctx.textAlign = "center";
           ctx.strokeText("Waiting for players...", canvasWidth / 2, canvasHeight / 3);
+          ctx.textAlign = "left";
 
       }
 
@@ -618,8 +622,10 @@ function gameSingleFrame() {
     connectedToServer = socket.connected;
     if (connectedToServer) {
         document.getElementById("connStatus").innerHTML = "Connection Status: Connected";
+        document.getElementById("connStatus").setAttribute("connected", "true");
     } else {
         document.getElementById("connStatus").innerHTML = "Connection Status: Disconnected";
+        document.getElementById("connStatus").setAttribute("connected", "false");
     }
     
     drawCanvas();

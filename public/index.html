@@ -16,7 +16,7 @@
 
       
       
-        <canvas id="myCanvas" width="1140" height="500">
+        <canvas id="myCanvas">
           Your browser does not support the HTML5 canvas tag.
         </canvas>
 
@@ -24,7 +24,7 @@
 
         <script src="/static/script/index.js"></script>
 
-        <img class="toHide" src="/static/image/background_image.png" id="title_background" width="1140px" height="500px">
+        <img class="toHide" src="/static/image/background_image.png" id="title_background">
         <img class="toHide" src="/static/image/shockwaveio_title.png" id="title_image" alt="Shockwave.io">
         
         <div id="header">
@@ -33,7 +33,6 @@
         <div id="connStatus" class="toHide"></div>
 
         <div id="textBlock">
-        <!-- <div id="apology" class="toHide">Our hosting service doesn't let us run our game server 24/7 in the background unfortunately<br>So the server might not respond if we're not running it.</div> -->
         <div class="toHide">Enter your name:</div>
         <input onfocus="if (this.value == 'Enter message'){this.value='';}" onblur="if (this.value == ''){this.value='Enter message';}" id="inputbox" type="text" name="inputText" value="" autocomplete="off">
 

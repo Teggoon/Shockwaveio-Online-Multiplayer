@@ -1,3 +1,5 @@
+const dist = require("../function/dist");
+
 function Shockwave (id, shockwaveID, x, y, angle, angleWidth, velocity, tV) {
     this.angle = angle;
     this.angleWidth = angleWidth / 180 * Math.PI; //sweep of the arc

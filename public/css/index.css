@@ -1,4 +1,6 @@
-
+body {
+    overflow: hidden;
+}
 
 @font-face {
 font-family: Phage;
@@ -6,8 +8,6 @@ src: url(Phage_Rough.oft) format(opentype);
 }
 #myCanvas {
 position: absolute;
-left: 55px;
-top: 50px;
 border:1px solid #DDDDDD;
 z-index: -1;
 }
@@ -36,7 +36,7 @@ z-index:10;
 #button {
 border: none;
 margin: 5px 5px;
-padding: 4px 9px;
+padding: 6px 10px;
 }
 #button:hover {
 background-color: #DDDDDD;
@@ -45,24 +45,19 @@ margin: 5px 5px;
 padding: 4px 9px;
 }
 #inputbox {
-border: 1px solid #DDDDDD;
+    margin-top: 1vh;
+    border: 1px solid #DDDDDD;
+    padding: 1vh 2px;
 }
-#apology {
-position: absolute;
-left: 0%;
-top: 70%;
-padding: 10px 20px;
-background-color: #EEEEEE;
-font-family: Arial;
-font-style: italic;
-font-size: 12px;
+#inputbox:focus {
+    outline: none;
 }
 #background_image {
 position: absolute;
 visibility: hidden;
 z-index: -2;
-width:90%;
-height:90%;
+width: 90%;
+height: 90%;
 }
 #title_image {
     width: 30%;
@@ -72,8 +67,11 @@ height:90%;
 }
 #title_background {
     position: absolute;
-    left:55px;
-    top:50px
+    left: -2px;
+    top: -2px;
+    height: 200vh;
+    width: 200vw;
+    animation: slowsliding 20s linear;
 }
 #connStatus {
     position: relative;
@@ -84,7 +82,19 @@ height:90%;
     font-size: 20px;
     font-family: arial;
     width: 200px;
-    background-color: #BBBBBB;
+    background-color: rgb(192, 192, 192);
     color: #FFFFFF;
-    
+}
+/* #connStatus[connected="true"] {
+    color: rgb(34, 172, 34);
+} */
+
+
+@keyframes slowsliding{
+    0% {
+        transform: translateX(0px) translateY(0px);
+    }
+    100% {
+        transform: translateX(-30vw) translateY(-30vh);
+    }
 }
