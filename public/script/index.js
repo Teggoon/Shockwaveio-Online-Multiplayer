@@ -33,6 +33,10 @@ var waitingForRespawning = false;
 var myName = "";
 var connectedToServer = false;
 
+
+const holeImage = document.getElementById("hole_image");
+const backgroundImage = document.getElementById("background_image");
+
 //from https://nerdparadise.com/programming/javascriptmouseposition
 function updateMouse(mouseEvent) {
   var obj = document.getElementById("myCanvas");
@@ -83,6 +87,7 @@ function CharacterData(id, name, x, y, z, r, score, velocity) {
   this.reload = 0;
   this.reloadSpeed = 0.05;
   this.angleWidth = 80;
+  this.radius = 30;
 }
 
 CharacterData.prototype.display = function(ctx, x, y) {
@@ -107,7 +112,7 @@ CharacterData.prototype.display = function(ctx, x, y) {
   ctx.rotate(this.r);
   ctx.scale(scaleSize / 2, scaleSize / 2);
   ctx.beginPath();
-  ctx.arc(0,0, 30, 0, TWO_PI);
+  ctx.arc(0,0, this.radius, 0, TWO_PI);
   ctx.strokeStyle = 'rgba(0,0,0,0.7)';
   ctx.fillStyle = "#fc9403";
   ctx.fill();
@@ -311,18 +316,15 @@ Shockwave.prototype.acceptPositionUpdate = function(angle, angleWidth, radius, t
 }
 
 //JELAN
-var Hole = function (x, y, size) {
+var Hole = function (x, y, radius) {
     this.x = x;
     this.y = y;
-    this.size = size;
+    this.radius = radius;
 };
 Hole.prototype.display = function(ctx) {
   ctx.save();
   ctx.beginPath();
-  ctx.translate(this.x, this.y);
-  ctx.arc(0,0, this.size, this.size, 0, TWO_PI);
-  ctx.fillStyle = "black";
-  ctx.fill();
+  ctx.drawImage(holeImage, this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
   ctx.restore();
 };
 
@@ -483,13 +485,9 @@ function drawCanvas () {
 
       ctx.beginPath();
       ctx.rect(-10, -10, canvasWidth + 20, canvasHeight + 20);
-      ctx.fillStyle = "#FFFFFF";
+      ctx.fillStyle = "rgb(252, 209, 79)"
 
       ctx.fill();
-      
-      
-      var img = document.getElementById("background_image");
-      ctx.drawImage(img, -MAP_SIZE / 2, -MAP_SIZE / 2, MAP_SIZE * 2, MAP_SIZE * 2);
   
 
 
@@ -500,8 +498,7 @@ function drawCanvas () {
         ctx.translate(canvasWidth/2 - myCharacter.x, canvasHeight/2 - myCharacter.y);
         ctx.translate(shakeX, shakeY);
 
-        var img = document.getElementById("background_image");
-        ctx.drawImage(img, -MAP_SIZE / 2, -MAP_SIZE / 2, MAP_SIZE * 2, MAP_SIZE * 2);
+        ctx.drawImage(backgroundImage, -MAP_SIZE / 2, -MAP_SIZE / 2);
 
         ctx.beginPath();
         ctx.rect(-MAP_SIZE / 2, -MAP_SIZE / 2, MAP_SIZE, MAP_SIZE);
@@ -586,7 +583,7 @@ function drawCanvas () {
       ctx.fill();
 
       ctx.textAlign = "left";
-      ctx.fillStyle = 'rgb(230,230,230)';
+      ctx.fillStyle = 'rgb(245,245,245)';
       ctx.font = "21px arial";
       ctx.fillText("WASD to move", canvasWidth / 32, canvasHeight / 8);
       ctx.fillText("Mouse to aim and shoot", canvasWidth / 32, canvasHeight / 8 + 22);

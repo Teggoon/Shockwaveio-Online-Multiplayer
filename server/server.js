@@ -153,17 +153,17 @@ io.on('connection', function(socket){
 function initHoles() {
   for (var i = 0; i < HOLE_NUM; i++){
     var halfDist = MAP_SIZE/2;
-    var x = Math.random() * MAP_SIZE;
-    var y = Math.random() * MAP_SIZE;
-    var size = 50 + Math.random() * 100;
-    holes.push(new Hole(x, y, size));
+    var x = Math.random() * MAP_SIZE - halfDist;
+    var y = Math.random() * MAP_SIZE - halfDist;
+    var radius = 40 + Math.random() * 80;
+    holes.push(new Hole(x, y, radius));
   }
-  holes.push(new Hole(200,200, 150));
+  holes.push(new Hole(200,200, 120));
 };
 
 function sendUserHoles(socket) {
   for (var i = 0; i < holes.length; i++) {
-    socket.emit("add hole", holes[i].x, holes[i].y, holes[i].size);
+    socket.emit("add hole", holes[i].x, holes[i].y, holes[i].radius);
   }
 }
 

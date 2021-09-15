@@ -22,6 +22,7 @@ function Character (id, name, user, x, y) {
     this.vy = 0;
     this.velocity = 10;
     this.life = 100;
+    this.radius = 30;
 }
 Character.prototype.acceptPositionUpdate = function(x, y, z, r) {
   this.x = x;
