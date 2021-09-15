@@ -56,7 +56,7 @@ function shockwaveHoleCollide(shockwave, hole) {
 
 
 io.on('connection', function(socket){
-  console.log('a user connected');
+  // console.log('a user connected');
 
 
     socket.on('disconnect', function(){
@@ -64,7 +64,7 @@ io.on('connection', function(socket){
     if (disappearedUser!= null){
       io.emit("message", disappearedUser.name + " has left the chat.");
       var userId = disappearedUser.id;
-      console.log("disappeared user id:" + userId);
+      // console.log("disappeared user id:" + userId);
       var userIndex = -1;
 
       characters.delete(userId);
@@ -72,7 +72,7 @@ io.on('connection', function(socket){
     }
 
     io.emit("delete user", userId);
-      console.log('user disconnected');
+      // console.log('user disconnected');
     });
 
     socket.on('message', function(msg) {
@@ -81,8 +81,8 @@ io.on('connection', function(socket){
     });
 
     socket.on("update stats", function(id, score, life) {
-      console.log(id);
-      console.log(characters.size);
+      // console.log(id);
+      // console.log(characters.size);
       var currentCharacter = characters.get(id);
       currentCharacter.score = score;
       currentCharacter.life = life;
@@ -91,7 +91,7 @@ io.on('connection', function(socket){
 
 
     socket.on("add shockwave", function(id, x, y, angle, angleWidth, velocity, tV) {
-      console.log("Shockwave requested!");
+      // console.log("Shockwave requested!");
       if (shockwaves.get(id) == null) {
             shockwaves.set(id, []);
       }
@@ -99,7 +99,7 @@ io.on('connection', function(socket){
       shockwaves.get(id).push(new Shockwave(id, shockwaveCounter, x, y, angle, angleWidth, velocity, tV));
       shockwaveCounter++;
 
-      console.log("shockwave size: " + shockwaves.get(id).length) ;
+      // console.log("shockwave size: " + shockwaves.get(id).length) ;
     });
 
     socket.on("update position", function(id, x, y, z, r) {
@@ -113,8 +113,8 @@ io.on('connection', function(socket){
 
     //NEW USER
     socket.on('name', function(name) {
-        console.log("new user's name is: " + name);
-        console.log("server holes length: " + holes.length);
+        // console.log("new user's name is: " + name);
+        // console.log("server holes length: " + holes.length);
         idCounter++;
         var newUser = new User(idCounter, name, socket);
         socketUserMap.set(socket, newUser);
@@ -143,7 +143,7 @@ io.on('connection', function(socket){
         socket.emit("set user myCharacter", true);
         sendUserHoles(socket);
 
-        console.log(characters.size);
+        // console.log(characters.size);
     });
 
 });
@@ -173,7 +173,7 @@ And removes this character from everywhere in the game (server + all clients)
 */
 //VICTORIA
 function sendDeathToClient (character) {
-  console.log("sent user his/her death");
+  // console.log("sent user his/her death");
   character.user.socket.emit("your death", "");
   io.emit("delete user", character.id);
   characters.delete(character.id);
