@@ -155,7 +155,7 @@ function initHoles() {
     var halfDist = MAP_SIZE/2;
     var x = Math.random() * MAP_SIZE - halfDist;
     var y = Math.random() * MAP_SIZE - halfDist;
-    var radius = 40 + Math.random() * 80;
+    var radius = 30 + Math.random() * 70;
     holes.push(new Hole(x, y, radius));
   }
   holes.push(new Hole(200,200, 120));
