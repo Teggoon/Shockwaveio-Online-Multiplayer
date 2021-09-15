@@ -488,9 +488,9 @@ function drawCanvas () {
       ctx.fill();
       
       
-        var img = document.getElementById("background_image");
-        ctx.drawImage(img, -MAP_SIZE / 2, -MAP_SIZE / 2, MAP_SIZE * 2, MAP_SIZE * 2);
-
+      var img = document.getElementById("background_image");
+      ctx.drawImage(img, -MAP_SIZE / 2, -MAP_SIZE / 2, MAP_SIZE * 2, MAP_SIZE * 2);
+  
 
 
       ctx.font = "30px Arial";
@@ -553,16 +553,19 @@ function drawCanvas () {
       ctx.font = "20px Arial";
 
       if (!playerAlive && !waitingForRespawning){
-          ctx.strokeText("You're dead! Click to respawn", canvasWidth / 2, canvasHeight / 2);
+        ctx.textAlign = "center";
+        ctx.strokeText("You're dead! Click to respawn", canvasWidth / 2, canvasHeight / 2);
+        ctx.textAlign = "left";
       } else if (waitingForRespawning){
+        ctx.textAlign = "center";
         ctx.strokeText("Respawning...", canvasWidth / 2, canvasHeight / 2);
+        ctx.textAlign = "left";
       }
 
       if (myID != -1 && characterDatas.size == 1){
-          ctx.textAlign = "center";
-          ctx.strokeText("Waiting for players...", canvasWidth / 2, canvasHeight / 3);
-          ctx.textAlign = "left";
-
+        ctx.textAlign = "center";
+        ctx.strokeText("Waiting for players...", canvasWidth / 2, canvasHeight / 3);
+        ctx.textAlign = "left";
       }
 
       if (shockwaves.get(myID) != null) {
@@ -574,7 +577,22 @@ function drawCanvas () {
           shakeX = 0;
           shakeY = 0;
         }
-      }
+      } 
+      
+      ctx.beginPath();
+      ctx.rect(canvasWidth / 32 - 12, canvasHeight / 8 - 29, 260, 90);
+      ctx.fillStyle = 'rgb(140,140,140)';
+
+      ctx.fill();
+
+      ctx.textAlign = "left";
+      ctx.fillStyle = 'rgb(230,230,230)';
+      ctx.font = "21px arial";
+      ctx.fillText("WASD to move", canvasWidth / 32, canvasHeight / 8);
+      ctx.fillText("Mouse to aim and shoot", canvasWidth / 32, canvasHeight / 8 + 22);
+      ctx.fillText("Space to jump", canvasWidth / 32, canvasHeight / 8 + 44);
+      ctx.textAlign = "left";
+      ctx.closePath();
 }
 
 function incrementScore(){
